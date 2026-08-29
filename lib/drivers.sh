@@ -84,8 +84,15 @@ dmg_install() {
     rm -rf "$tmp"
     return 1
   fi
-  ditto "$vol/$app.app" "/Applications/$app.app"
-  hdiutil detach "$vol" -quiet
+  if ! ditto "$vol/$app.app" "/Applications/$app.app"; then
+    err "$app: copy failed — could not install the app"
+    hdiutil detach "$vol" -quiet || true
+    rm -rf "$tmp"
+    return 1
+  fi
+  if ! hdiutil detach "$vol" -quiet; then
+    warn "could not detach $vol"
+  fi
   rm -rf "$tmp"
   log "$app: installed to /Applications/$app.app"
 }
