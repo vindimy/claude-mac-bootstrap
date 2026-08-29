@@ -1,0 +1,1 @@
+# claude-mac-bootstrap
