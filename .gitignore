@@ -1,0 +1,3 @@
+# Per-machine selection config — never committed (and hostname-keyed so
+# Dropbox sync between machines cannot clobber it).
+local/
