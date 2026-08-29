@@ -39,7 +39,7 @@ select_apps() {
               ;;
             *)
               if [ "$tok" -ge 1 ] && [ "$tok" -le "${#APP_IDS[@]}" ]; then
-                id="${APP_IDS[$((tok - 1))]}"
+                id="${APP_IDS[$((10#$tok - 1))]}"
                 if in_list "$id" "$current"; then
                   current="$(remove_from_list "$id" "$current")"
                 else
