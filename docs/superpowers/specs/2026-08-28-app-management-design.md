@@ -19,14 +19,18 @@ local config file.
 | `chrome` | Google Chrome | brew cask | `google-chrome` |
 | `firefox` | Firefox | brew cask | `firefox` |
 | `little-snitch` | Little Snitch | brew cask | `little-snitch` |
-| `controld` | Control D (GUI) | direct dmg | controld.com download |
+| `controld` | Control D (GUI) | direct dmg | `https://assets.controld.com/utility/controld_{arm,x86}.dmg` by arch; installs `Control D Utility App.app` |
 | `claude` | Claude Desktop | brew cask | `claude` |
 | `claude-code` | Claude Code | brew cask | `claude-code` |
 | `gemini` | Google Gemini Desktop | brew cask | `google-gemini` |
 | `gemini-cli` | Gemini CLI | brew formula | `gemini-cli` |
 | `chatgpt` | ChatGPT | brew cask | `chatgpt` |
-| `grok` | Grok | direct dmg | grok.com download |
 | `maccy` | Maccy | brew cask | `maccy` |
+
+**Grok is excluded** (decided 2026-08-28): xAI ships no official macOS
+distribution — no cask, no Mac App Store app (the App Store "Grok AI" is
+iOS/iPadOS-only), no dmg. Revisit if xAI releases a desktop app; adding it back
+is one new `apps/grok.sh` file. README notes it as web-only.
 
 **Homebrew** is required infrastructure, not a selectable app: `run.sh` installs it
 when missing; `update.sh` runs `brew update` + upgrades. It is never uninstalled by
@@ -48,7 +52,6 @@ apps/
   gemini.sh
   gemini-cli.sh
   chatgpt.sh
-  grok.sh
   maccy.sh
 lib/
   common.sh             # logging, dry-run plumbing, config load/save, brew bootstrap
@@ -74,7 +77,7 @@ chrome_installed() { cask_installed google-chrome; }
 ```
 
 - Brew-based apps delegate to `lib/drivers.sh` one-liners (`cask_*`, `formula_*`).
-- Direct-dmg apps (`controld`, `grok`) delegate to `dmg_*` drivers with their
+- Direct-dmg apps (`controld`) delegate to `dmg_*` drivers with their
   download URL and `.app` bundle name; anything vendor-specific stays in that
   app's file.
 - The engine discovers apps by globbing `apps/*.sh` — adding an app to the system
@@ -93,7 +96,7 @@ chrome_installed() { cask_installed google-chrome; }
 - **direct dmg**: download to a temp dir with `curl -fL`, attach with
   `hdiutil attach -nobrowse`, `ditto` the `.app` into `/Applications`, detach,
   clean up. Install fails loudly with a manual-download hint if the URL breaks.
-  Both dmg apps self-update (Sparkle-style), so `dmg_update` only reinstalls when
+  The Control D utility self-updates, so `dmg_update` only reinstalls when
   the app bundle is missing from `/Applications`. Uninstall removes the `.app`;
   zap additionally removes the app's `~/Library` preference/support paths listed
   in the app's script.
