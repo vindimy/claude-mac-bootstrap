@@ -8,10 +8,23 @@ the managed files into place per machine.
 ## Setup on a new machine
 
 1. Install Dropbox and let `Dev/claude-mac-bootstrap` sync.
-2. Run `~/Dropbox/Dev/claude-mac-bootstrap/install.sh` from a terminal.
+2. Run `~/Dropbox/Dev/claude-mac-bootstrap/run.sh` from a terminal and pick
+   the apps this machine should manage.
 
-`install.sh` is idempotent — re-run it any time (e.g. after new files are added here).
-It backs up any pre-existing real file as `<file>.pre-bootstrap.bak` before linking.
+`run.sh` installs Homebrew if needed, links the managed dotfiles (via
+`install.sh`), then installs/updates the selected apps. Re-run it any time to
+change the selection — deselected apps are uninstalled (you choose per app
+whether their settings are kept or zapped).
+
+Non-interactive use:
+
+```sh
+./run.sh --non-interactive            # reuse this machine's saved selection
+./run.sh --apps chrome,maccy          # set the exact selection without prompts
+./run.sh --apps none                  # uninstall everything managed
+./run.sh --dry-run --apps chrome      # print actions without executing
+./update.sh                           # update Homebrew + all selected apps
+```
 
 ## Managed files
 
@@ -19,6 +32,34 @@ It backs up any pre-existing real file as `<file>.pre-bootstrap.bak` before link
 |---|---|---|
 | `dotfiles/.zprofile` | `~/.zprofile` (symlink) | Login-shell env: Homebrew, PATH, Java/Android; triggers the daily dropbox-ignore-git sweep |
 | `bin/dropbox-ignore-git.sh` | `~/.local/bin/dropbox-ignore-git.sh` (symlink) | Marks every `.git` dir under `~/Library/CloudStorage/Dropbox` with `com.dropbox.ignored=1` so Dropbox sync can never corrupt a git index |
+
+## Managed apps
+
+Selected per machine via `run.sh`; the selection lives in
+`local/<hostname>.conf` (gitignored — the repo holds only automation, never a
+machine's configuration; hostname keying keeps Dropbox sync from clobbering
+other machines).
+
+| App id | App | How |
+|---|---|---|
+| `chrome` | Google Chrome | brew cask `google-chrome` (self-updates) |
+| `firefox` | Firefox | brew cask `firefox` |
+| `little-snitch` | Little Snitch | brew cask `little-snitch`; system-extension approval + license are manual |
+| `controld` | Control D GUI utility | vendor dmg from assets.controld.com (self-updates) |
+| `claude` | Claude Desktop | brew cask `claude` (self-updates) |
+| `claude-code` | Claude Code | brew cask `claude-code` |
+| `gemini` | Google Gemini Desktop | brew cask `google-gemini` (self-updates) |
+| `gemini-cli` | Gemini CLI | brew formula `gemini-cli` |
+| `chatgpt` | ChatGPT | brew cask `chatgpt` (self-updates) |
+| `maccy` | Maccy | brew cask `maccy` |
+
+Grok has no official macOS app (no cask, no Mac App Store app, no dmg as of
+2026-08-28) and is web-only for now. To add a new app later: drop an
+`apps/<id>.sh` implementing `<id>_install/_update/_uninstall/_installed`
+(hyphens become underscores) — nothing else to register.
+
+`update.sh` updates Homebrew plus only the selected apps; casks marked
+self-updating are left to their own updaters unless missing.
 
 ## dropbox-ignore-git sweep
 
