@@ -35,6 +35,11 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --non-interactive) NON_INTERACTIVE=1 ;;
     --apps)
+      if [ $# -lt 2 ]; then
+        err "--apps requires a value"
+        usage
+        exit 2
+      fi
       shift
       APPS_ARG="${1:-}"
       ;;
