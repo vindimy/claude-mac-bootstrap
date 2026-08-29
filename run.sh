@@ -92,6 +92,7 @@ INSTALLED=""
 UPDATED=""
 REMOVED=""
 FAILED=""
+REMOVE_FAILED=""
 
 # shellcheck disable=SC2086
 for id in $NEW_SELECTED; do
@@ -124,13 +125,16 @@ for id in $SELECTED; do
     REMOVED="$REMOVED $id"
   else
     FAILED="$FAILED $id"
+    REMOVE_FAILED="$REMOVE_FAILED $id"
   fi
 done
 
+# Failed removals stay installed, so keep them in the saved selection —
+# otherwise a failed uninstall would be forgotten and never retried.
 if [ "$DRY_RUN" = 1 ]; then
-  log "[dry-run] save selection [$NEW_SELECTED] to $(config_file)"
+  log "[dry-run] save selection [$NEW_SELECTED$REMOVE_FAILED] to $(config_file)"
 else
-  SELECTED="$NEW_SELECTED"
+  SELECTED="$NEW_SELECTED$REMOVE_FAILED"
   save_config
 fi
 

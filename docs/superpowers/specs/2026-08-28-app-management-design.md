@@ -111,7 +111,7 @@ chrome_installed() { cask_installed google-chrome; }
 
   ```bash
   # managed by run.sh — do not sync between machines
-  SELECTED=(chrome firefox claude-code maccy)
+  SELECTED="chrome firefox claude-code maccy"
   ```
 
 - The saved `SELECTED` list doubles as the record of what is currently managed:
@@ -140,7 +140,7 @@ chrome_installed() { cask_installed google-chrome; }
      Interactive: per-app prompt — keep settings or zap. Non-interactive: keep
      settings (app-only uninstall).
 6. Save the new selection to `local/<hostname>.conf`.
-7. Print a summary: installed / updated / removed / skipped, plus post-install
+7. Print a summary: installed / updated / removed, plus post-install
    notes (e.g. Little Snitch requires manual system-extension approval in
    System Settings; App/daemon sign-ins are manual).
 

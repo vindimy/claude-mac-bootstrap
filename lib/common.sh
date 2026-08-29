@@ -76,6 +76,9 @@ ensure_homebrew() {
     log "[dry-run] install Homebrew from https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
     return 0
   fi
+  # Bypasses run_cmd deliberately: run_cmd would still evaluate this command
+  # substitution under --dry-run, eagerly curling the install script even
+  # though nothing would execute — the dry-run branch above already returned.
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   if [ -x /opt/homebrew/bin/brew ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"

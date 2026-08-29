@@ -20,11 +20,15 @@ Non-interactive use:
 
 ```sh
 ./run.sh --non-interactive            # reuse this machine's saved selection
-./run.sh --apps chrome,maccy          # set the exact selection without prompts
-./run.sh --apps none                  # uninstall everything managed
+./run.sh --apps chrome,maccy          # set the selection, skipping the checklist
+./run.sh --non-interactive --apps none  # uninstall everything managed, no prompts (settings kept)
 ./run.sh --dry-run --apps chrome      # print actions without executing
 ./update.sh                           # update Homebrew + all selected apps
 ```
+
+`--apps` only replaces the checklist step — removals of deselected apps still
+prompt keep-or-zap per app unless `--non-interactive` is also given, in which
+case removals proceed without prompting and settings are kept.
 
 ## Managed files
 

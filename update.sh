@@ -20,6 +20,8 @@ EOF
 
 while [ $# -gt 0 ]; do
   case "$1" in
+    # Exported (not just set) so shellcheck (SC2034) sees it used externally
+    # by lib/common.sh; behavior-neutral, common.sh reads it via env either way.
     --dry-run) export DRY_RUN=1 ;;
     -h | --help)
       usage
