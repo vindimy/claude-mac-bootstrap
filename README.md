@@ -58,6 +58,17 @@ if a clone ends up in synced or shared storage).
 | `gemini-cli` | Gemini CLI | brew formula `gemini-cli` |
 | `chatgpt` | ChatGPT | brew cask `chatgpt` (self-updates) |
 | `maccy` | Maccy | brew cask `maccy` |
+| `claude-plugins` | Claude Code plugins (11 from 8 marketplaces) | `claude plugin` CLI; needs `claude-code` |
+| `gsd` | GSD skill suite (67 `gsd-*` skills) | npm `get-shit-done-cc` (installs Node if needed) |
+| `agent-skills` | Provenance-tracked agent skills (softaworks/agent-toolkit ×30 + composio) | skills.sh CLI (`npx skills`), selective updates only |
+
+The three agent-tooling units mirror the inventory in
+`claude-nyamaste-studios-strategy/tech/skills.md`. `agent-skills` manages only
+the upstream-restorable set and always updates selectively by name — never a
+bare `skills update`, which would sync upstream's deletion of the culled
+mattpocock skills. Local-only skills (the 20 mattpocock survivors, the 19
+awesome-claude-skills copies, graphify) live solely in `~/.agents/skills` and
+are synced manually, not managed here.
 
 Grok has no official macOS app (no cask, no Mac App Store app, no dmg as of
 2026-08-28) and is web-only for now. To add a new app later: drop an
