@@ -47,7 +47,9 @@ if a clone ends up in synced or shared storage).
 | App id | App | How |
 |---|---|---|
 | `chrome` | Google Chrome | brew cask `google-chrome` (self-updates) |
+| `dropbox` | Dropbox | brew cask `dropbox` (self-updates) |
 | `firefox` | Firefox | brew cask `firefox` |
+| `google-drive` | Google Drive | brew cask `google-drive` (self-updates) |
 | `little-snitch` | Little Snitch | brew cask `little-snitch`; system-extension approval + license are manual |
 | `controld` | Control D GUI utility | vendor dmg from assets.controld.com (self-updates) |
 | `claude` | Claude Desktop | brew cask `claude` (self-updates) |
