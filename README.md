@@ -1,15 +1,15 @@
 # claude-mac-bootstrap
 
 Bootstrap and continuously maintain a desired macOS machine configuration — apps, tools,
-and their configs — managed via automation. The repo lives in Dropbox
-(`~/Dropbox/Dev/claude-mac-bootstrap`) so every machine syncs it; `install.sh` symlinks
-the managed files into place per machine.
+and their configs — managed via automation. Each machine clones this repo from git
+and runs the automation locally; the repo holds only scripts, never a machine's
+configuration. `install.sh` symlinks the managed files into place per machine.
 
 ## Setup on a new machine
 
-1. Install Dropbox and let `Dev/claude-mac-bootstrap` sync.
-2. Run `~/Dropbox/Dev/claude-mac-bootstrap/run.sh` from a terminal and pick
-   the apps this machine should manage.
+1. Clone the repo:
+   `git clone https://github.com/vindimy/claude-mac-bootstrap.git && cd claude-mac-bootstrap`
+2. Run `./run.sh` and pick the apps this machine should manage.
 
 `run.sh` installs Homebrew if needed, links the managed dotfiles (via
 `install.sh`), then installs/updates the selected apps. Re-run it any time to
@@ -41,8 +41,8 @@ case removals proceed without prompting and settings are kept.
 
 Selected per machine via `run.sh`; the selection lives in
 `local/<hostname>.conf` (gitignored — the repo holds only automation, never a
-machine's configuration; hostname keying keeps Dropbox sync from clobbering
-other machines).
+machine's configuration; hostname keying also keeps selections separate even
+if a clone ends up in synced or shared storage).
 
 | App id | App | How |
 |---|---|---|

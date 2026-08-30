@@ -5,7 +5,7 @@
 
 ## Goal
 
-Extend claude-mac-bootstrap so a Mac — new or already in use — can clone/sync the
+Extend claude-mac-bootstrap so a Mac — new or already in use — can clone the
 repo and run `./run.sh` (interactively or non-interactively) to select which managed
 apps it wants. Selected apps are installed and kept updated on every run; deselected
 apps are uninstalled. `./update.sh` updates everything currently managed. The repo
@@ -107,9 +107,10 @@ chrome_installed() { cask_installed google-chrome; }
 ## Per-machine config
 
 - Path: `local/$(hostname -s).conf`; `local/` is gitignored.
-- Rationale: a plain gitignored file would still sync via Dropbox to every
-  machine and be clobbered; hostname keying makes Dropbox sync a feature — a
-  machine's selection survives reinstall.
+- Rationale (updated 2026-08-30): each machine clones the repo from git and
+  keeps its selection purely local — the repo never stores machine config.
+  Hostname keying is defensive: even if a clone lands in synced or shared
+  storage, machines cannot clobber each other's selections.
 - Format: plain bash, sourced by the engine:
 
   ```bash
