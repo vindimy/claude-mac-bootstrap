@@ -6,8 +6,18 @@
 
 cask_installed() { brew list --cask "$1" >/dev/null 2>&1; }
 
-# --adopt takes over an app the user already installed manually.
-cask_install() { run_cmd brew install --cask --adopt "$1"; }
+# --adopt takes over an app the user already installed manually, but only
+# when it is identical to the cask's copy. Self-updating apps usually drift
+# from the cask version, so on adopt failure fall back to --force: the bundle
+# is replaced by the cask's copy (settings in ~/Library survive) and the
+# app's own updater brings it current afterward. Under --dry-run, run_cmd
+# returns 0, so only the adopt line is printed.
+cask_install() {
+  if ! run_cmd brew install --cask --adopt "$1"; then
+    warn "$1: existing app differs from the cask — replacing it with the brew-managed copy (settings preserved)"
+    run_cmd brew install --cask --force "$1"
+  fi
+}
 
 # `brew outdated <name>` exits non-zero when a newer version exists. Casks
 # marked auto_updates (Chrome, Claude, ChatGPT, Gemini) are not reported
@@ -83,6 +93,11 @@ dmg_install() {
     if [ -n "$vol" ]; then hdiutil detach "$vol" -quiet || true; fi
     rm -rf "$tmp"
     return 1
+  fi
+  # ditto merges into an existing bundle; remove any pre-existing copy first
+  # so stale files from an older version cannot linger inside the new one.
+  if [ -d "/Applications/$app.app" ]; then
+    rm -rf "/Applications/$app.app"
   fi
   if ! ditto "$vol/$app.app" "/Applications/$app.app"; then
     err "$app: copy failed — could not install the app"

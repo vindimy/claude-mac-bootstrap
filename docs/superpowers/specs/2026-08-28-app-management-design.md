@@ -88,7 +88,10 @@ chrome_installed() { cask_installed google-chrome; }
 ## Drivers (`lib/drivers.sh`)
 
 - **brew cask**: `cask_install` uses `brew install --cask --adopt` so an app the
-  user already installed manually is taken over instead of erroring.
+  user already installed manually is taken over instead of erroring. Adopt only
+  accepts an identical copy, so on failure (version drift — the normal case for
+  self-updating apps) it falls back to `brew install --cask --force`, replacing
+  the bundle with the cask's copy; settings in `~/Library` survive.
   `cask_update` uses `brew upgrade --cask` (no-op when current).
   `cask_uninstall` uses `brew uninstall --cask` plus `--zap` when asked.
 - **brew formula**: same shape via `brew install` / `brew upgrade` /
