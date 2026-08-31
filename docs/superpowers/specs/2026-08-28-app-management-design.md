@@ -40,7 +40,7 @@ is one new `apps/grok.sh` file. README notes it as web-only.
 | `google-drive` | Google Drive | brew cask | `google-drive` |
 | `claude-plugins` | Claude Code plugins | `claude plugin` CLI | 11-plugin roster from 8 marketplaces (manifest in the app script) |
 | `gsd` | GSD skill suite | npm global | `get-shit-done-cc`; installs `node` formula if npm missing; installed-check is the deployed footprint (`~/.local/bin/gsd-sdk`, `~/.claude/skills/gsd-*`), not the npm tree |
-| `agent-skills` | Provenance-tracked agent skills | skills.sh CLI | `softaworks/agent-toolkit` ×30 + `composio`; updates always selective by name (bare `skills update` would sync upstream deletions of the culled mattpocock skills); local-only skills are out of scope |
+| `agent-skills` | Provenance-tracked agent skills | skills.sh CLI | Roster of repo\|skill-list records in the app script (2026-08-30: 57 skills from `softaworks/agent-toolkit`, `composiohq/skills`, `coreyhaines31/marketingskills`, `lyndonkl/claude`, `alirezarezvani/claude-skills`); updates always selective by name (bare `skills update` would sync upstream deletions of the culled mattpocock skills); local-only skills are out of scope |
 
 The agent-tooling rosters mirror `claude-nyamaste-studios-strategy/tech/skills.md`
 (2026-08-27 audit) and live inside their `apps/*.sh` files as the single source

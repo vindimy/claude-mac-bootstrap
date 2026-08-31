@@ -60,7 +60,7 @@ if a clone ends up in synced or shared storage).
 | `maccy` | Maccy | brew cask `maccy` |
 | `claude-plugins` | Claude Code plugins (11 from 8 marketplaces) | `claude plugin` CLI; needs `claude-code` |
 | `gsd` | GSD skill suite (67 `gsd-*` skills) | npm `get-shit-done-cc` (installs Node if needed) |
-| `agent-skills` | Provenance-tracked agent skills (softaworks/agent-toolkit ×30 + composio) | skills.sh CLI (`npx skills`), selective updates only |
+| `agent-skills` | Provenance-tracked agent skills (57 from 5 repos: softaworks/agent-toolkit, composio, coreyhaines31/marketingskills, lyndonkl/claude, alirezarezvani/claude-skills) | skills.sh CLI (`npx skills`), selective updates only; roster in `apps/agent-skills.sh` |
 
 The three agent-tooling units mirror the inventory in
 `claude-nyamaste-studios-strategy/tech/skills.md`. `agent-skills` manages only
