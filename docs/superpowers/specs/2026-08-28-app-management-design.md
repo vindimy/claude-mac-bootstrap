@@ -78,6 +78,12 @@ of truth.
 | `codex` | Codex CLI | brew cask | `codex` (binary release from github.com/openai/codex; no self-update, brew upgrades it) |
 | `antigravity` | Google Antigravity | brew cask | `antigravity` (self-updates) |
 
+**Added 2026-09-04** (text editor):
+
+| App id | Display name | Method | Source |
+|---|---|---|---|
+| `sublime-text` | Sublime Text | brew cask | `sublime-text` (self-updates); license activation is manual (unlicensed build is fully functional with purchase reminders) |
+
 **Categories (added 2026-09-04):** each `apps/*.sh` sets `APP_CATEGORY`
 (captured by `discover_apps` alongside `APP_NAME`/`APP_NOTE`); the `run.sh`
 checklist groups apps under category headers in the order AI, Browsers,

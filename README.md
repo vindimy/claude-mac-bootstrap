@@ -82,6 +82,7 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `agent-skills` | Provenance-tracked agent skills (57 from 5 repos: softaworks/agent-toolkit, composio, coreyhaines31/marketingskills, lyndonkl/claude, alirezarezvani/claude-skills) | skills.sh CLI (`npx skills`), selective updates only; roster in `apps/agent-skills.sh` |
 | `codex` | Codex CLI | brew cask `codex` (binary release; brew-updated) |
 | `antigravity` | Google Antigravity | brew cask `antigravity` (self-updates) |
+| `sublime-text` | Sublime Text | brew cask `sublime-text` (self-updates) |
 
 The `run.sh` checklist groups apps by category (AI, Browsers, Development,
 Creative, Cloud Storage, System Tools) from each app's `APP_CATEGORY`; the
