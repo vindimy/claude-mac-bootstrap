@@ -21,7 +21,7 @@ local config file.
 | `little-snitch` | Little Snitch | brew cask | `little-snitch` |
 | `controld` | Control D (GUI) | direct dmg | `https://assets.controld.com/utility/controld_{arm,x86}.dmg` by arch; installs `Control D Utility App.app` |
 | `claude` | Claude Desktop | brew cask | `claude` |
-| `claude-code` | Claude Code | brew cask | `claude-code` |
+| `claude-code` | Claude Code | native installer | `https://claude.ai/install.sh` → `~/.local/bin/claude` (self-updates; brew cask dropped 2026-09-03 — it trails releases) |
 | `gemini` | Google Gemini Desktop | brew cask | `google-gemini` |
 | `gemini-cli` | Gemini CLI | brew formula | `gemini-cli` |
 | `chatgpt` | ChatGPT | brew cask | `chatgpt` |

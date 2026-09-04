@@ -53,7 +53,7 @@ if a clone ends up in synced or shared storage).
 | `little-snitch` | Little Snitch | brew cask `little-snitch`; system-extension approval + license are manual |
 | `controld` | Control D GUI utility | vendor dmg from assets.controld.com (self-updates) |
 | `claude` | Claude Desktop | brew cask `claude` (self-updates) |
-| `claude-code` | Claude Code | brew cask `claude-code` |
+| `claude-code` | Claude Code | native installer `claude.ai/install.sh` (self-updates); brew cask dropped — it trails releases |
 | `gemini` | Google Gemini Desktop | brew cask `google-gemini` (self-updates) |
 | `gemini-cli` | Gemini CLI | brew formula `gemini-cli` |
 | `chatgpt` | ChatGPT | brew cask `chatgpt` (self-updates) |
