@@ -43,7 +43,7 @@ case removals proceed without prompting and settings are kept.
 
 | Repo file | Installed at | Purpose |
 |---|---|---|
-| `dotfiles/.zprofile` | `~/.zprofile` (symlink) | Login-shell env: Homebrew, PATH, Java/Android; triggers the daily dropbox-ignore-git sweep |
+| `dotfiles/.zprofile` | `~/.zprofile` and `~/.profile` (symlinks) | Login-shell env for zsh and bash: Homebrew, PATH, Java/Android; triggers the daily dropbox-ignore-git sweep |
 | `bin/dropbox-ignore-git.sh` | `~/.local/bin/dropbox-ignore-git.sh` (symlink) | Marks every `.git` dir under `~/Library/CloudStorage/Dropbox` with `com.dropbox.ignored=1` so Dropbox sync can never corrupt a git index; no-ops on machines without a Dropbox folder |
 
 ## Managed apps
