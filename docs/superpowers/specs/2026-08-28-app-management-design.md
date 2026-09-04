@@ -53,10 +53,16 @@ of truth.
 
 | App id | Display name | Method | Source |
 |---|---|---|---|
-| `docker` | Docker Desktop | brew cask | `docker-desktop` (the deprecated `docker` cask name is not used); chosen over docker CLI + colima 2026-09-04 |
+| `docker` | Docker Desktop | brew cask | `docker-desktop` (the deprecated `docker` cask name is not used); chosen over docker CLI + colima 2026-09-04 as the interactive/GUI engine — see `colima` below for the boot-time engine added later the same day |
 | `xcode` | Xcode | Mac App Store via `mas` | `mas install 497799835`; needs App Store sign-in; install/update run license accept + `-runFirstLaunch` + `xcode-select -s` (sudo); mas cannot uninstall — removal deletes the bundle, zap also clears `~/Library/Developer` |
 | `fastlane` | fastlane | brew formula | `fastlane`; the only extra iOS build tool chosen (no CocoaPods/swiftlint — SwiftPM ships in Xcode) |
 | `android-studio` | Android Studio | brew cask | `android-studio`; SDK/emulators via the IDE's first-launch wizard; `.zprofile` prefers `~/Library/Android/sdk` over brew commandlinetools for `ANDROID_HOME` |
+
+**Added 2026-09-04** (reboot-surviving containers):
+
+| App id | Display name | Method | Source |
+|---|---|---|---|
+| `colima` | Colima (headless Docker engine) | brew formulas | `colima` + `docker` + `docker-compose`; a system LaunchDaemon (`/Library/LaunchDaemons/dev.colima.plist`, `RunAtLoad` + `KeepAlive`, runs as the user) starts the VM at boot before login so containers with `--restart` policies survive reboot — the one thing Docker Desktop's per-user GUI engine cannot do. Coexists with `docker` (Docker Desktop): separate engines, separate container stores; reboot-surviving containers go in the colima docker context. Requires FileVault off (a locked disk blocks everything at boot; conflicts with the hardening spec's FileVault item — resolve per machine). Not root: launchd's `UserName` key runs it as the user pre-login. If the default vz driver won't start pre-login, fall back to `--vm-type qemu` |
 
 **Added 2026-09-04** (terminal + creative tools):
 

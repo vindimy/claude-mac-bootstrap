@@ -70,6 +70,7 @@ repo is migrated there automatically.)
 | `iterm` | iTerm2 | brew cask `iterm2` (self-updates) |
 | `adobe-cc` | Adobe Creative Cloud | brew cask `adobe-creative-cloud` (self-updates); sign in, then install individual Adobe apps from the CC app |
 | `docker` | Docker Desktop | brew cask `docker-desktop` (self-updates); approve the privileged helper on first launch |
+| `colima` | Colima (headless Docker engine) | brew formulas `colima` + `docker` + `docker-compose`; LaunchDaemon starts the VM at boot (pre-login) so `--restart` containers survive reboot; needs FileVault off; separate engine from Docker Desktop |
 | `xcode` | Xcode (iOS builds) | Mac App Store via brew formula `mas`; needs App Store sign-in, accepts license + first-launch setup (sudo) |
 | `fastlane` | fastlane | brew formula `fastlane`; iOS/Android build + release automation |
 | `android-studio` | Android Studio | brew cask `android-studio` (self-updates); SDK via first-launch wizard, `.zprofile` exports `ANDROID_HOME` when the SDK exists |
