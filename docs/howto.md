@@ -61,6 +61,22 @@ sudo launchctl bootout system/dev.colima          # stop + disable
 sudo launchctl bootstrap system /Library/LaunchDaemons/dev.colima.plist  # re-enable
 ```
 
+**Using existing docker-compose workflows:** compose follows the active
+docker context, so existing projects work unchanged:
+
+1. `docker context use colima` (once — it sticks until something switches it;
+   Docker Desktop may steal it back to `desktop-linux` when it starts).
+2. In the project directory, `docker compose up -d` as usual. The unit
+   installs the brew `docker-compose` formula; if the plugin form
+   (`docker compose`) is not recognized, either call the standalone
+   `docker-compose` binary or add brew's plugin dir to `~/.docker/config.json`:
+   `{"cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]}`.
+3. For reboot survival, give every service a restart policy in the compose
+   file (`restart: unless-stopped`) — after a reboot dockerd restarts the
+   containers itself; there is no need to re-run `docker compose up`.
+4. For tools that ignore docker contexts, point them at the socket directly:
+   `DOCKER_HOST=unix://$HOME/.colima/default/docker.sock`.
+
 **Requirements and gotchas:**
 
 - FileVault must stay **off** on the machine — a locked disk blocks
