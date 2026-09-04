@@ -14,6 +14,10 @@ if [ -d "$HOME/go/bin" ]; then PATH="$PATH:$HOME/go/bin"; fi
 export PATH="$HOME/.local/bin:$PATH"
 
 # Toolchains that only some machines carry — silent no-ops elsewhere.
+if [ -d "$HOME/.bun/bin" ]; then
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
+fi
 if _jh="$(/usr/libexec/java_home -v 17 2>/dev/null)"; then export JAVA_HOME="$_jh"; fi
 unset _jh
 if [ -d /opt/homebrew/share/android-commandlinetools ]; then
