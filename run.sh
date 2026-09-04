@@ -1,9 +1,41 @@
 #!/bin/bash
 # Entry point: bootstrap Homebrew + dotfiles, choose managed apps, reconcile.
 # Interactive by default; see --help for non-interactive use.
+#
+# Also runs standalone: curl this one file onto a fresh Mac and execute it —
+# it shallow-clones the repo into ~/.mac-bootstrap/repo and re-execs from there.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+
+if [ ! -f "$REPO_ROOT/lib/common.sh" ]; then
+  # Standalone mode: this is a lone curl-ed copy (or `curl | bash`), not a
+  # checkout. Fetch the real repo, then hand over to its run.sh.
+  BOOTSTRAP_HOME="${MAC_BOOTSTRAP_HOME:-$HOME/.mac-bootstrap}"
+  REPO_URL="${MAC_BOOTSTRAP_REPO:-https://github.com/vindimy/claude-mac-bootstrap.git}"
+  REPO_DIR="$BOOTSTRAP_HOME/repo"
+  # A fresh macOS has a git stub that pops a GUI dialog; detect the Command
+  # Line Tools directly so the flow stays scriptable.
+  if ! xcode-select -p >/dev/null 2>&1; then
+    echo "git needs the Xcode Command Line Tools — starting their installer now." >&2
+    echo "Re-run this script once that installation finishes." >&2
+    xcode-select --install >/dev/null 2>&1 || true
+    exit 1
+  fi
+  if [ -d "$REPO_DIR/.git" ]; then
+    git -C "$REPO_DIR" pull --ff-only
+  else
+    mkdir -p "$BOOTSTRAP_HOME"
+    git clone --depth 1 "$REPO_URL" "$REPO_DIR"
+  fi
+  # Under `curl | bash` stdin is the pipe; reattach the terminal (when one
+  # can actually be opened) so the interactive checklist can read answers.
+  if [ ! -t 0 ] && { : </dev/tty; } 2>/dev/null; then
+    exec "$REPO_DIR/run.sh" ${1+"$@"} </dev/tty
+  fi
+  exec "$REPO_DIR/run.sh" ${1+"$@"}
+fi
+
 # shellcheck disable=SC1091
 . "$REPO_ROOT/lib/common.sh"
 # shellcheck disable=SC1091
@@ -18,7 +50,7 @@ Usage: run.sh [--non-interactive] [--apps id1,id2,...] [--dry-run] [--help]
 Installs Homebrew (if missing) and the repo dotfiles, then reconciles this
 machine's managed apps: newly selected apps are installed, still-selected apps
 are updated, deselected apps are uninstalled. The selection is saved to
-local/<hostname>.conf (gitignored).
+~/.mac-bootstrap/apps.conf.
 
   --non-interactive  no prompts; requires a saved selection or --apps
   --apps LIST        comma-separated app ids as the exact new selection

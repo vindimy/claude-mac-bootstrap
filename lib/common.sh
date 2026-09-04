@@ -36,14 +36,30 @@ remove_from_list() {
   printf '%s\n' "$out"
 }
 
-CONFIG_DIR="${BOOTSTRAP_CONFIG_DIR:-$REPO_ROOT/local}"
+# Bootstrap state lives in the user's home dir, outside the repo — the repo
+# holds only automation and can be cloned anywhere (default: ~/.mac-bootstrap/repo).
+CONFIG_DIR="${BOOTSTRAP_CONFIG_DIR:-${MAC_BOOTSTRAP_HOME:-$HOME/.mac-bootstrap}}"
 
-config_file() { printf '%s/%s.conf\n' "$CONFIG_DIR" "$(hostname -s)"; }
+config_file() { printf '%s/apps.conf\n' "$CONFIG_DIR"; }
+
+# Pre-2026-09-03 the selection lived in the repo at local/<hostname>.conf;
+# adopt such a file into ~/.mac-bootstrap/apps.conf once, then forget it.
+migrate_legacy_config() {
+  local legacy new
+  new="$(config_file)"
+  legacy="$REPO_ROOT/local/$(hostname -s).conf"
+  if [ ! -f "$new" ] && [ -f "$legacy" ]; then
+    mkdir -p "$CONFIG_DIR"
+    mv "$legacy" "$new"
+    log "moved app selection: $legacy -> $new"
+  fi
+}
 
 # Sets SELECTED from this machine's config; SELECTED="" and return 1 if absent.
 load_config() {
   SELECTED=""
   local cf
+  migrate_legacy_config
   cf="$(config_file)"
   if [ ! -f "$cf" ]; then return 1; fi
   # shellcheck source=/dev/null

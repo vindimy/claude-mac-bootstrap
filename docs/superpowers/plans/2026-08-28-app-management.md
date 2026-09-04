@@ -22,7 +22,7 @@
 - Managed app set (10): chrome, firefox, little-snitch, controld, claude, claude-code, gemini, gemini-cli, chatgpt, maccy. **Grok is excluded** (no official macOS distribution — see spec).
 - Homebrew is infrastructure: installed when missing, never uninstalled by selection.
 - Repo root scripts `run.sh` / `update.sh` are executable (`chmod +x`); `lib/` and `apps/` files are sourced, not executable.
-- All shell verification commands below are run from the repo root: `/Users/dv/Library/CloudStorage/Dropbox/Dev/claude-mac-bootstrap`.
+- All shell verification commands below are run from the repo root (the local checkout of this repo).
 - No test framework (per spec). Each task verifies via shellcheck + concrete dry-run/function invocations with expected output shown.
 - If `shellcheck` is not installed, install it first with `brew install shellcheck`.
 
@@ -1097,8 +1097,9 @@ Replace the "Setup on a new machine" section with:
 ```markdown
 ## Setup on a new machine
 
-1. Install Dropbox and let `Dev/claude-mac-bootstrap` sync.
-2. Run `~/Dropbox/Dev/claude-mac-bootstrap/run.sh` from a terminal and pick
+1. Clone the repo. (Historical: this plan predates the git-clone distribution
+   model and the curl-able standalone `run.sh` of 2026-09-03.)
+2. Run `./run.sh` from the checkout and pick
    the apps this machine should manage.
 
 `run.sh` installs Homebrew if needed, links the managed dotfiles (via

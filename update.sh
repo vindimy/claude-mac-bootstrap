@@ -3,6 +3,16 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Fetch the latest automation before running it (the repo is distributed by
+# git clone). Runs before the libs are sourced so the fresh code is what
+# executes. Never fatal: offline machines and diverged dev checkouts just
+# run what they have.
+if git -C "$REPO_ROOT" rev-parse --git-dir >/dev/null 2>&1; then
+  git -C "$REPO_ROOT" pull --ff-only --quiet 2>/dev/null ||
+    echo "warning: could not fast-forward $REPO_ROOT; running the current checkout" >&2
+fi
+
 # shellcheck disable=SC1091
 . "$REPO_ROOT/lib/common.sh"
 # shellcheck disable=SC1091
@@ -12,9 +22,10 @@ usage() {
   cat <<'EOF'
 Usage: update.sh [--dry-run] [--help]
 
-Updates Homebrew, then updates each app in this machine's saved selection
-(local/<hostname>.conf). Only managed apps are touched — other brew packages
-are left alone. Run ./run.sh to change the selection.
+Pulls the latest automation, updates Homebrew, then updates each app in this
+machine's saved selection (~/.mac-bootstrap/apps.conf). Only managed apps are
+touched — other brew packages are left alone. Run ./run.sh to change the
+selection.
 EOF
 }
 

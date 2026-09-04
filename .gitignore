@@ -1,3 +1,4 @@
-# Per-machine selection config — never committed. Hostname-keyed so machines
-# can't clobber each other even if a clone lands in synced storage.
+# Legacy per-machine selection location (pre-2026-09-03) — never committed.
+# The selection now lives in ~/.mac-bootstrap/apps.conf; load_config adopts
+# any leftover local/<hostname>.conf automatically.
 local/

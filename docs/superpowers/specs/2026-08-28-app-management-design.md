@@ -5,12 +5,15 @@
 
 ## Goal
 
-Extend claude-mac-bootstrap so a Mac — new or already in use — can clone the
-repo and run `./run.sh` (interactively or non-interactively) to select which managed
-apps it wants. Selected apps are installed and kept updated on every run; deselected
-apps are uninstalled. `./update.sh` updates everything currently managed. The repo
-holds only automation; each machine's selection lives in a gitignored, hostname-keyed
-local config file.
+Extend claude-mac-bootstrap so a Mac — new or already in use — can run
+`./run.sh` (interactively or non-interactively) to select which managed apps
+it wants. A lone curl-ed copy of `run.sh` bootstraps a fresh machine by
+shallow-cloning the repo to `~/.mac-bootstrap/repo` and re-execing from it
+(updated 2026-09-03). Selected apps are installed and kept updated on every
+run; deselected apps are uninstalled. `./update.sh` pulls the repo, then
+updates everything currently managed. The repo holds only automation; each
+machine's selection lives in `~/.mac-bootstrap/apps.conf`, outside any
+checkout or synced storage.
 
 ## Managed apps (initial set)
 
@@ -71,8 +74,10 @@ lib/
   common.sh             # logging, dry-run plumbing, config load/save, brew bootstrap
   drivers.sh            # shared install/update/uninstall drivers: brew cask, brew formula, direct dmg
   ui.sh                 # interactive checklist and per-app uninstall prompts
-local/                  # gitignored; per-machine config (see below)
 ```
+
+Machine-local state lives outside the repo in `~/.mac-bootstrap/` (see below);
+`local/` in the repo is only the gitignored legacy config location.
 
 ## Per-app script contract
 
@@ -120,11 +125,13 @@ chrome_installed() { cask_installed google-chrome; }
 
 ## Per-machine config
 
-- Path: `local/$(hostname -s).conf`; `local/` is gitignored.
-- Rationale (updated 2026-08-30): each machine clones the repo from git and
-  keeps its selection purely local — the repo never stores machine config.
-  Hostname keying is defensive: even if a clone lands in synced or shared
-  storage, machines cannot clobber each other's selections.
+- Path: `~/.mac-bootstrap/apps.conf` (updated 2026-09-03; overridable via
+  `BOOTSTRAP_CONFIG_DIR`, and `MAC_BOOTSTRAP_HOME` moves the whole state dir).
+- Rationale: each machine clones the repo from git and keeps its selection in
+  the user's home dir — the repo never stores machine config, and the config
+  survives the checkout being moved or re-cloned. The pre-2026-09-03 location
+  was `local/$(hostname -s).conf` inside the repo; `load_config` migrates such
+  a file automatically.
 - Format: plain bash, sourced by the engine:
 
   ```bash
@@ -157,7 +164,7 @@ chrome_installed() { cask_installed google-chrome; }
    - Deselected (in saved config, not in new selection) → `<id>_uninstall`.
      Interactive: per-app prompt — keep settings or zap. Non-interactive: keep
      settings (app-only uninstall).
-6. Save the new selection to `local/<hostname>.conf`.
+6. Save the new selection to `~/.mac-bootstrap/apps.conf`.
 7. Print a summary: installed / updated / removed, plus post-install
    notes (e.g. Little Snitch requires manual system-extension approval in
    System Settings; App/daemon sign-ins are manual).
@@ -166,11 +173,14 @@ Idempotent throughout: re-running with an unchanged selection just updates.
 
 ## update.sh flow
 
-1. Load `local/<hostname>.conf`; exit with guidance if missing (run `run.sh` first).
-2. `brew update`.
-3. For each selected app: `<id>_update`. Brew upgrades touch only managed
+1. `git pull --ff-only` the repo itself (non-fatal — offline or diverged
+   checkouts run what they have).
+2. Load `~/.mac-bootstrap/apps.conf`; exit with guidance if missing (run
+   `run.sh` first).
+3. `brew update`.
+4. For each selected app: `<id>_update`. Brew upgrades touch only managed
    casks/formulas — never the machine's unrelated brew packages.
-4. Supports `--dry-run`. Summary at the end.
+5. Supports `--dry-run`. Summary at the end.
 
 ## Error handling
 
