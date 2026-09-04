@@ -1,15 +1,16 @@
 #!/bin/bash
 # shellcheck disable=SC2034
-# Claude Code plugins — the 11-plugin roster from 8 marketplaces, per the
-# inventory in claude-nyamaste-studios-strategy/tech/skills.md (2026-08-27).
+# Claude Code plugins — the 12-plugin roster from 9 marketplaces, per the
+# inventory in claude-nyamaste-studios-strategy/tech/skills.md (2026-08-27);
+# ecc (Everything Claude Code, affaan-m/ecc) added 2026-09-04.
 # Managed headlessly via the `claude plugin` CLI; requires the claude-code app.
 APP_NAME="Claude Code plugins"
 APP_CATEGORY="AI"
 APP_NOTE="Restart Claude Code (new session) so freshly installed/updated plugins load."
 
-CLAUDE_PLUGIN_MARKETPLACES="anthropics/claude-plugins-official mksglu/context-mode thedotmack/claude-mem forrestchang/andrej-karpathy-skills cloudflare/skills Egonex-AI/Understand-Anything anthropics/skills blader/humanizer"
+CLAUDE_PLUGIN_MARKETPLACES="anthropics/claude-plugins-official mksglu/context-mode thedotmack/claude-mem forrestchang/andrej-karpathy-skills cloudflare/skills Egonex-AI/Understand-Anything anthropics/skills blader/humanizer affaan-m/ecc"
 
-CLAUDE_PLUGINS="superpowers@claude-plugins-official frontend-design@claude-plugins-official mattpocock-skills@claude-plugins-official context-mode@context-mode claude-mem@thedotmack andrej-karpathy-skills@karpathy-skills cloudflare@cloudflare understand-anything@understand-anything example-skills@anthropic-agent-skills document-skills@anthropic-agent-skills humanizer@humanizer"
+CLAUDE_PLUGINS="superpowers@claude-plugins-official frontend-design@claude-plugins-official mattpocock-skills@claude-plugins-official context-mode@context-mode claude-mem@thedotmack andrej-karpathy-skills@karpathy-skills cloudflare@cloudflare understand-anything@understand-anything example-skills@anthropic-agent-skills document-skills@anthropic-agent-skills humanizer@humanizer ecc@ecc"
 
 claude_plugins_require_cli() {
   # On a fresh machine the claude-code unit installed ~/.local/bin/claude

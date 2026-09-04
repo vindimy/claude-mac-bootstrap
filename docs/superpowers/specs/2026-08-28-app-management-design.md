@@ -41,7 +41,7 @@ is one new `apps/grok.sh` file. README notes it as web-only.
 |---|---|---|---|
 | `dropbox` | Dropbox | brew cask | `dropbox` |
 | `google-drive` | Google Drive | brew cask | `google-drive` |
-| `claude-plugins` | Claude Code plugins | `claude plugin` CLI | 11-plugin roster from 8 marketplaces (manifest in the app script) |
+| `claude-plugins` | Claude Code plugins | `claude plugin` CLI | 12-plugin roster from 9 marketplaces (manifest in the app script; `ecc@ecc` from `affaan-m/ecc` added 2026-09-04) |
 | `gsd` | GSD skill suite | npm global | `get-shit-done-cc`; installs `node` formula if npm missing; installed-check is the deployed footprint (`~/.local/bin/gsd-sdk`, `~/.claude/skills/gsd-*`), not the npm tree |
 | `agent-skills` | Provenance-tracked agent skills | skills.sh CLI | Roster of repo\|skill-list records in the app script (2026-08-30: 57 skills from `softaworks/agent-toolkit`, `composiohq/skills`, `coreyhaines31/marketingskills`, `lyndonkl/claude`, `alirezarezvani/claude-skills`); updates always selective by name (bare `skills update` would sync upstream deletions of the culled mattpocock skills); local-only skills are out of scope |
 

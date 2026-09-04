@@ -77,7 +77,7 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `xcode` | Xcode (iOS builds) | Mac App Store via brew formula `mas`; needs App Store sign-in, accepts license + first-launch setup (sudo) |
 | `fastlane` | fastlane | brew formula `fastlane`; iOS/Android build + release automation |
 | `android-studio` | Android Studio | brew cask `android-studio` (self-updates); SDK via first-launch wizard, `.zprofile` exports `ANDROID_HOME` when the SDK exists |
-| `claude-plugins` | Claude Code plugins (11 from 8 marketplaces) | `claude plugin` CLI; needs `claude-code` |
+| `claude-plugins` | Claude Code plugins (12 from 9 marketplaces) | `claude plugin` CLI; needs `claude-code` |
 | `gsd` | GSD skill suite (67 `gsd-*` skills) | npm `get-shit-done-cc` (installs Node if needed) |
 | `agent-skills` | Provenance-tracked agent skills (57 from 5 repos: softaworks/agent-toolkit, composio, coreyhaines31/marketingskills, lyndonkl/claude, alirezarezvani/claude-skills) | skills.sh CLI (`npx skills`), selective updates only; roster in `apps/agent-skills.sh` |
 | `codex` | Codex CLI | brew cask `codex` (binary release; brew-updated) |
