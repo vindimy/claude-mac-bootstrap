@@ -20,7 +20,11 @@ if [ -d "$HOME/.bun/bin" ]; then
 fi
 if _jh="$(/usr/libexec/java_home -v 17 2>/dev/null)"; then export JAVA_HOME="$_jh"; fi
 unset _jh
-if [ -d /opt/homebrew/share/android-commandlinetools ]; then
+# Android SDK: prefer Android Studio's managed SDK, else brew commandlinetools.
+if [ -d "$HOME/Library/Android/sdk" ]; then
+  export ANDROID_HOME="$HOME/Library/Android/sdk"
+  export PATH="$ANDROID_HOME/platform-tools:$PATH"
+elif [ -d /opt/homebrew/share/android-commandlinetools ]; then
   export ANDROID_HOME="/opt/homebrew/share/android-commandlinetools"
   export PATH="$ANDROID_HOME/platform-tools:$PATH"
 fi

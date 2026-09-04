@@ -49,6 +49,15 @@ The agent-tooling rosters mirror `claude-nyamaste-studios-strategy/tech/skills.m
 (2026-08-27 audit) and live inside their `apps/*.sh` files as the single source
 of truth.
 
+**Added 2026-09-04** (container + mobile development):
+
+| App id | Display name | Method | Source |
+|---|---|---|---|
+| `docker` | Docker Desktop | brew cask | `docker-desktop` (the deprecated `docker` cask name is not used); chosen over docker CLI + colima 2026-09-04 |
+| `xcode` | Xcode | Mac App Store via `mas` | `mas install 497799835`; needs App Store sign-in; install/update run license accept + `-runFirstLaunch` + `xcode-select -s` (sudo); mas cannot uninstall — removal deletes the bundle, zap also clears `~/Library/Developer` |
+| `fastlane` | fastlane | brew formula | `fastlane`; the only extra iOS build tool chosen (no CocoaPods/swiftlint — SwiftPM ships in Xcode) |
+| `android-studio` | Android Studio | brew cask | `android-studio`; SDK/emulators via the IDE's first-launch wizard; `.zprofile` prefers `~/Library/Android/sdk` over brew commandlinetools for `ANDROID_HOME` |
+
 **Homebrew** is required infrastructure, not a selectable app: `run.sh` installs it
 when missing; `update.sh` runs `brew update` + upgrades. It is never uninstalled by
 deselection (deselecting it would orphan every cask-managed app).
