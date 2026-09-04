@@ -40,6 +40,7 @@ if [ ! -f "$REPO_ROOT/lib/common.sh" ]; then
       if [ -z "$CLT_LABEL" ] || ! sudo softwareupdate -i "$CLT_LABEL"; then
         rm -f "$CLT_SENTINEL"
         echo "Headless install failed — trying Apple's GUI installer instead." >&2
+        echo "WARNING: its installation window may open hidden behind the Terminal window — move/minimize windows to find it." >&2
         echo "Re-run this script once that installation finishes." >&2
         xcode-select --install
         exit 1
