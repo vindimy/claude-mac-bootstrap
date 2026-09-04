@@ -17,10 +17,39 @@ if [ ! -f "$REPO_ROOT/lib/common.sh" ]; then
   # A fresh macOS has a git stub that pops a GUI dialog; detect the Command
   # Line Tools directly so the flow stays scriptable.
   if ! xcode-select -p >/dev/null 2>&1; then
-    echo "git needs the Xcode Command Line Tools — starting their installer now." >&2
-    echo "Re-run this script once that installation finishes." >&2
-    xcode-select --install >/dev/null 2>&1 || true
-    exit 1
+    CLT_DIR=/Library/Developer/CommandLineTools
+    if [ -x "$CLT_DIR/usr/bin/git" ]; then
+      # Tools are on disk but the active developer directory is unset/broken
+      # (this also makes `xcode-select --install` refuse with "already
+      # installed" and show no dialog).
+      echo "Xcode Command Line Tools are present but inactive — activating them (admin password may be asked)." >&2
+      sudo xcode-select -s "$CLT_DIR"
+    else
+      # `xcode-select --install` only posts a GUI dialog and reports failures
+      # we would otherwise never see (no dialog appears over SSH, catalog
+      # errors, stale receipts). Install headlessly through softwareupdate
+      # instead; the sentinel file makes the CLT packages appear in its
+      # catalog. Fall back to the dialog only if that fails, with its output
+      # visible.
+      echo "git needs the Xcode Command Line Tools — installing them now (this can take a while)." >&2
+      CLT_SENTINEL=/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+      touch "$CLT_SENTINEL"
+      CLT_LABEL="$(softwareupdate -l 2>/dev/null \
+        | sed -n 's/^\* Label: \(Command Line Tools for Xcode-.*\)$/\1/p' \
+        | sort -V | tail -n 1)"
+      if [ -z "$CLT_LABEL" ] || ! sudo softwareupdate -i "$CLT_LABEL"; then
+        rm -f "$CLT_SENTINEL"
+        echo "Headless install failed — trying Apple's GUI installer instead." >&2
+        echo "Re-run this script once that installation finishes." >&2
+        xcode-select --install
+        exit 1
+      fi
+      rm -f "$CLT_SENTINEL"
+    fi
+    if ! xcode-select -p >/dev/null 2>&1; then
+      echo "Xcode Command Line Tools still unavailable after install — see errors above." >&2
+      exit 1
+    fi
   fi
   if [ -d "$REPO_DIR/.git" ]; then
     git -C "$REPO_DIR" pull --ff-only
