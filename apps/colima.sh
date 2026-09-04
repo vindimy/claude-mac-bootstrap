@@ -54,7 +54,19 @@ EOF
 colima_install() {
   local f
   for f in $COLIMA_FORMULAS; do
-    formula_update "$f" || return 1
+    if ! formula_update "$f"; then
+      # The docker formula and the docker-desktop cask both link the same
+      # shell-completion files (etc/bash_completion.d/docker, _docker,
+      # docker.fish). With Docker Desktop installed, `brew install docker`
+      # leaves the keg installed but fails at the link step. Overwriting is
+      # safe — same CLI, equivalent completions — and hands ownership of
+      # the symlinks to the formula so upgrades stay clean.
+      if [ "$f" = docker ]; then
+        run_cmd brew link --overwrite docker || return 1
+      else
+        return 1
+      fi
+    fi
   done
   # First start runs interactively so VM creation (image download, vz setup)
   # and the docker context land while errors are visible; the daemon then
