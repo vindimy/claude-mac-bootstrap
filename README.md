@@ -53,6 +53,9 @@ Selected per machine via `run.sh`; the selection lives in
 machine's configuration. (A pre-2026-09-03 `local/<hostname>.conf` inside the
 repo is migrated there automatically.)
 
+Per-app operational notes — post-install steps, gotchas, recovery — live in
+[docs/howto.md](docs/howto.md).
+
 | App id | App | How |
 |---|---|---|
 | `chrome` | Google Chrome | brew cask `google-chrome` (self-updates) |
