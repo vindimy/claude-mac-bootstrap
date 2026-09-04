@@ -12,6 +12,11 @@ CLAUDE_PLUGIN_MARKETPLACES="anthropics/claude-plugins-official mksglu/context-mo
 CLAUDE_PLUGINS="superpowers@claude-plugins-official frontend-design@claude-plugins-official mattpocock-skills@claude-plugins-official context-mode@context-mode claude-mem@thedotmack andrej-karpathy-skills@karpathy-skills cloudflare@cloudflare understand-anything@understand-anything example-skills@anthropic-agent-skills document-skills@anthropic-agent-skills humanizer@humanizer"
 
 claude_plugins_require_cli() {
+  # On a fresh machine the claude-code unit installed ~/.local/bin/claude
+  # moments ago in this same run — no login shell has put it on PATH yet.
+  if ! command -v claude >/dev/null 2>&1 && [ -x "$HOME/.local/bin/claude" ]; then
+    PATH="$HOME/.local/bin:$PATH"
+  fi
   if ! command -v claude >/dev/null 2>&1; then
     err "claude CLI not found — select the claude-code app first"
     return 1
@@ -71,7 +76,7 @@ claude_plugins_uninstall() {
 
 claude_plugins_installed() {
   local p list
-  command -v claude >/dev/null 2>&1 || return 1
+  claude_plugins_require_cli 2>/dev/null || return 1
   list="$(claude plugin list 2>/dev/null)" || return 1
   # shellcheck disable=SC2086
   for p in $CLAUDE_PLUGINS; do
