@@ -50,12 +50,14 @@ agent_skills_all_names() {
 }
 
 agent_skills_install() {
-  local repo skills csv rc=0
+  local repo skills rc=0
   if ! agent_skills_require_npm; then return 1; fi
   while IFS='|' read -r repo skills; do
     if [ -z "$repo" ]; then continue; fi
-    csv="$(printf '%s' "$skills" | tr ' ' ',')"
-    if ! run_cmd npx -y skills add "$repo" -g -y -s "$csv"; then
+    # -s takes space-separated names; a comma-joined list is treated as one
+    # (nonexistent) skill name and matches nothing.
+    # shellcheck disable=SC2086
+    if ! run_cmd npx -y skills add "$repo" -g -y -s $skills; then
       err "agent-skills: install from $repo failed"
       rc=1
     fi
