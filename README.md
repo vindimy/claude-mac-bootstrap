@@ -67,6 +67,8 @@ repo is migrated there automatically.)
 | `gemini-cli` | Gemini CLI | brew formula `gemini-cli` |
 | `chatgpt` | ChatGPT | brew cask `chatgpt` (self-updates) |
 | `maccy` | Maccy | brew cask `maccy` |
+| `iterm` | iTerm2 | brew cask `iterm2` (self-updates) |
+| `adobe-cc` | Adobe Creative Cloud | brew cask `adobe-creative-cloud` (self-updates); sign in, then install individual Adobe apps from the CC app |
 | `docker` | Docker Desktop | brew cask `docker-desktop` (self-updates); approve the privileged helper on first launch |
 | `xcode` | Xcode (iOS builds) | Mac App Store via brew formula `mas`; needs App Store sign-in, accepts license + first-launch setup (sudo) |
 | `fastlane` | fastlane | brew formula `fastlane`; iOS/Android build + release automation |

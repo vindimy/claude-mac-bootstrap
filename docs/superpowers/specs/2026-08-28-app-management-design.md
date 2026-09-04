@@ -58,6 +58,13 @@ of truth.
 | `fastlane` | fastlane | brew formula | `fastlane`; the only extra iOS build tool chosen (no CocoaPods/swiftlint — SwiftPM ships in Xcode) |
 | `android-studio` | Android Studio | brew cask | `android-studio`; SDK/emulators via the IDE's first-launch wizard; `.zprofile` prefers `~/Library/Android/sdk` over brew commandlinetools for `ANDROID_HOME` |
 
+**Added 2026-09-04** (terminal + creative tools):
+
+| App id | Display name | Method | Source |
+|---|---|---|---|
+| `iterm` | iTerm2 | brew cask | `iterm2` (self-updates) |
+| `adobe-cc` | Adobe Creative Cloud | brew cask | `adobe-creative-cloud` (self-updates); installs only the CC desktop app — individual Adobe apps are installed from inside it after sign-in, and cask uninstall removes only the CC app itself |
+
 **Homebrew** is required infrastructure, not a selectable app: `run.sh` installs it
 when missing; `update.sh` runs `brew update` + upgrades. It is never uninstalled by
 deselection (deselecting it would orphan every cask-managed app).
