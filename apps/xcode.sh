@@ -4,6 +4,7 @@
 # Full Xcode (not just the Command Line Tools) is required to build iOS apps.
 # Updates ride the App Store once installed; `mas upgrade` forces the check.
 APP_NAME="Xcode"
+APP_CATEGORY="Development"
 APP_NOTE="Needs the machine signed into the App Store app (~12GB download). First install accepts the license and installs components, which asks for your admin password."
 
 XCODE_MAS_ID=497799835

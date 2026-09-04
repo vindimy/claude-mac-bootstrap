@@ -1,25 +1,71 @@
 #!/bin/bash
 # Interactive selection UI. Sourced after lib/common.sh; needs discover_apps
-# to have populated APP_IDS/APP_NAMES.
+# to have populated APP_IDS/APP_NAMES/APP_CATEGORIES.
 
-# Checklist over all discovered apps, pre-checked from $SELECTED.
-# Toggle by number, a=all, n=none, empty input confirms into NEW_SELECTED.
+# Display order for category headers in the checklist. Categories used by an
+# app but absent here (including the "Other" fallback) are appended at the end
+# in discovery order.
+CATEGORY_ORDER=("AI" "Browsers" "Development" "Creative" "Cloud Storage" "System Tools")
+
+category_in_order() {
+  local c
+  for c in "${CATEGORY_ORDER[@]}"; do
+    if [ "$c" = "$1" ]; then return 0; fi
+  done
+  return 1
+}
+
+# print_app_row index current-selection — one numbered checklist line. Numbers
+# are the app's discovery index, stable regardless of display grouping.
+print_app_row() {
+  local mark=" "
+  if in_list "${APP_IDS[$1]}" "$2"; then mark=x; fi
+  printf '  %2d) [%s] %s\n' "$(($1 + 1))" "$mark" "${APP_NAMES[$1]}"
+}
+
+# print_category_group category current-selection — header + rows for one
+# category; prints nothing when no app carries it.
+print_category_group() {
+  local cat="$1" current="$2" idx=0 shown=0
+  while [ "$idx" -lt "${#APP_IDS[@]}" ]; do
+    if [ "${APP_CATEGORIES[$idx]}" = "$cat" ]; then
+      if [ "$shown" = 0 ]; then
+        log ""
+        log "$cat"
+        shown=1
+      fi
+      print_app_row "$idx" "$current"
+    fi
+    idx=$((idx + 1))
+  done
+}
+
+# Checklist over all discovered apps, grouped by APP_CATEGORY and pre-checked
+# from $SELECTED. Toggle by number, a=all, n=none, empty input confirms into
+# NEW_SELECTED.
 select_apps() {
-  local current="$SELECTED" input tok idx id
+  local current="$SELECTED" input tok idx id cat seen
+  local extra_cats=()
+  idx=0
+  while [ "$idx" -lt "${#APP_IDS[@]}" ]; do
+    cat="${APP_CATEGORIES[$idx]}"
+    if ! category_in_order "$cat"; then
+      seen=0
+      for id in ${extra_cats[@]+"${extra_cats[@]}"}; do
+        if [ "$id" = "$cat" ]; then seen=1; fi
+      done
+      if [ "$seen" = 0 ]; then extra_cats+=("$cat"); fi
+    fi
+    idx=$((idx + 1))
+  done
   while :; do
     log ""
     log "Select apps to manage. Checked apps are installed and kept updated;"
     log "unchecking a previously managed app uninstalls it."
-    idx=0
-    while [ "$idx" -lt "${#APP_IDS[@]}" ]; do
-      id="${APP_IDS[$idx]}"
-      if in_list "$id" "$current"; then
-        printf '  %2d) [x] %s\n' "$((idx + 1))" "${APP_NAMES[$idx]}"
-      else
-        printf '  %2d) [ ] %s\n' "$((idx + 1))" "${APP_NAMES[$idx]}"
-      fi
-      idx=$((idx + 1))
+    for cat in "${CATEGORY_ORDER[@]}" ${extra_cats[@]+"${extra_cats[@]}"}; do
+      print_category_group "$cat" "$current"
     done
+    log ""
     printf 'Toggle numbers (space-separated), a=all, n=none, Enter=confirm: '
     read -r input
     case "$input" in

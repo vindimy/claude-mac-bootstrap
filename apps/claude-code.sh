@@ -4,6 +4,7 @@
 # The brew cask lags many versions behind, so brew no longer manages this.
 # Footprint: ~/.local/bin/claude symlink into ~/.local/share/claude/versions/.
 APP_NAME="Claude Code"
+APP_CATEGORY="AI"
 APP_NOTE="Installed via the native installer; the app keeps itself current. The brew cask is not used — it trails releases."
 
 claude_code_installed() { [ -x "$HOME/.local/bin/claude" ]; }

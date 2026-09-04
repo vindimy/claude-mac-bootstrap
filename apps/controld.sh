@@ -4,6 +4,7 @@
 # dmg (URL verified 2026-08-28). The utility self-updates, so update only
 # reinstalls when the app is missing.
 APP_NAME="Control D"
+APP_CATEGORY="System Tools"
 APP_NOTE="Open 'Control D Utility App' and sign in to finish DNS setup (resolver config is per-machine, not managed by this repo)."
 
 CONTROLD_BUNDLE="Control D Utility App"

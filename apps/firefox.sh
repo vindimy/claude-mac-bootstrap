@@ -2,6 +2,7 @@
 # shellcheck disable=SC2034
 # Mozilla Firefox — Homebrew cask.
 APP_NAME="Firefox"
+APP_CATEGORY="Browsers"
 
 firefox_install()   { cask_install firefox; }
 firefox_update()    { cask_update firefox; }

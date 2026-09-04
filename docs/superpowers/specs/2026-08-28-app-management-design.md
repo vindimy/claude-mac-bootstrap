@@ -65,6 +65,20 @@ of truth.
 | `iterm` | iTerm2 | brew cask | `iterm2` (self-updates) |
 | `adobe-cc` | Adobe Creative Cloud | brew cask | `adobe-creative-cloud` (self-updates); installs only the CC desktop app — individual Adobe apps are installed from inside it after sign-in, and cask uninstall removes only the CC app itself |
 
+**Added 2026-09-04** (AI coding agents):
+
+| App id | Display name | Method | Source |
+|---|---|---|---|
+| `codex` | Codex CLI | brew cask | `codex` (binary release from github.com/openai/codex; no self-update, brew upgrades it) |
+| `antigravity` | Google Antigravity | brew cask | `antigravity` (self-updates) |
+
+**Categories (added 2026-09-04):** each `apps/*.sh` sets `APP_CATEGORY`
+(captured by `discover_apps` alongside `APP_NAME`/`APP_NOTE`); the `run.sh`
+checklist groups apps under category headers in the order AI, Browsers,
+Development, Creative, Cloud Storage, System Tools, with unknown/unset
+categories appended (unset falls back to "Other"). Toggle numbers remain the
+discovery index, so grouping never changes an app's number.
+
 **Homebrew** is required infrastructure, not a selectable app: `run.sh` installs it
 when missing; `update.sh` runs `brew update` + upgrades. It is never uninstalled by
 deselection (deselecting it would orphan every cask-managed app).

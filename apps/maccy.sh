@@ -2,6 +2,7 @@
 # shellcheck disable=SC2034
 # Maccy clipboard manager — Homebrew cask.
 APP_NAME="Maccy"
+APP_CATEGORY="System Tools"
 
 maccy_install()   { cask_install maccy; }
 maccy_update()    { cask_update maccy; }

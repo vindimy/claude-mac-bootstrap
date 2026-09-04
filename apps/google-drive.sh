@@ -2,6 +2,7 @@
 # shellcheck disable=SC2034
 # Google Drive — Homebrew cask (auto-updates itself once installed).
 APP_NAME="Google Drive"
+APP_CATEGORY="Cloud Storage"
 APP_NOTE="Open Google Drive and sign in to start syncing."
 
 google_drive_install()   { cask_install google-drive; }

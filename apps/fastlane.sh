@@ -3,6 +3,7 @@
 # fastlane — Homebrew formula. iOS/Android build, signing, and release
 # automation; pairs with the xcode unit for iOS work.
 APP_NAME="fastlane"
+APP_CATEGORY="Development"
 
 fastlane_install()   { formula_install fastlane; }
 fastlane_update()    { formula_update fastlane; }

@@ -3,6 +3,7 @@
 # Little Snitch — Homebrew cask. Needs a manual one-time system-extension
 # approval after install; license/rules are never touched by this repo.
 APP_NAME="Little Snitch"
+APP_CATEGORY="System Tools"
 APP_NOTE="Approve the Little Snitch system extension in System Settings > General > Login Items & Extensions, then enter your license."
 
 little_snitch_install()   { cask_install little-snitch; }

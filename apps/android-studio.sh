@@ -4,6 +4,7 @@
 # The IDE manages the Android SDK/emulators itself; the managed .zprofile
 # exports ANDROID_HOME and puts platform-tools on PATH when the SDK exists.
 APP_NAME="Android Studio"
+APP_CATEGORY="Development"
 APP_NOTE="Run the first-launch setup wizard once to download the Android SDK and emulator."
 
 android_studio_install()   { cask_install android-studio; }

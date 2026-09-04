@@ -2,6 +2,7 @@
 # shellcheck disable=SC2034
 # Google Gemini CLI — Homebrew formula.
 APP_NAME="Gemini CLI"
+APP_CATEGORY="AI"
 
 gemini_cli_install()   { formula_install gemini-cli; }
 gemini_cli_update()    { formula_update gemini-cli; }

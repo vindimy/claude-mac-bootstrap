@@ -111,9 +111,10 @@ ensure_homebrew() {
 APP_IDS=()
 APP_NAMES=()
 APP_NOTES=()
+APP_CATEGORIES=()
 
-# Source every apps/*.sh, capturing its APP_NAME/APP_NOTE and defining its
-# <id>_* functions in the current shell.
+# Source every apps/*.sh, capturing its APP_NAME/APP_NOTE/APP_CATEGORY and
+# defining its <id>_* functions in the current shell.
 discover_apps() {
   local f id
   for f in "$REPO_ROOT"/apps/*.sh; do
@@ -121,11 +122,13 @@ discover_apps() {
     id="$(basename "$f" .sh)"
     APP_NAME=""
     APP_NOTE=""
+    APP_CATEGORY=""
     # shellcheck source=/dev/null
     . "$f"
     APP_IDS+=("$id")
     APP_NAMES+=("${APP_NAME:-$id}")
     APP_NOTES+=("$APP_NOTE")
+    APP_CATEGORIES+=("${APP_CATEGORY:-Other}")
   done
   if [ "${#APP_IDS[@]}" -eq 0 ]; then
     err "no app definitions found in $REPO_ROOT/apps"

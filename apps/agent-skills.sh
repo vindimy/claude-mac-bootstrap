@@ -19,6 +19,7 @@
 # via `npx skills add <owner/repo> -l`; keep installs selective to avoid
 # skill-list bloat in every agent session.
 APP_NAME="Agent skills (provenance-tracked)"
+APP_CATEGORY="AI"
 APP_NOTE="Local-only skills (mattpocock set, awesome-claude-skills copies, graphify) are not managed here — sync those manually."
 
 # One record per line: owner/repo|space-separated skill names.

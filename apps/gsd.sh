@@ -3,6 +3,7 @@
 # GSD skill suite (get-shit-done-cc) — 67 gsd-* skills for Claude Code,
 # installed as a global npm package. Needs Node.js (brew formula `node`).
 APP_NAME="GSD skill suite"
+APP_CATEGORY="AI"
 APP_NOTE="For future updates prefer running the gsd-update skill inside Claude Code — it backs up custom files before GSD's clean-install step."
 
 gsd_require_npm() {

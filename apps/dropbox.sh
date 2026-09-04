@@ -2,6 +2,7 @@
 # shellcheck disable=SC2034
 # Dropbox — Homebrew cask (auto-updates itself once installed).
 APP_NAME="Dropbox"
+APP_CATEGORY="Cloud Storage"
 APP_NOTE="Open Dropbox and sign in to start syncing (per-machine sync selections are manual)."
 
 dropbox_install()   { cask_install dropbox; }

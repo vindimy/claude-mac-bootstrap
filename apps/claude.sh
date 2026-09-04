@@ -2,6 +2,7 @@
 # shellcheck disable=SC2034
 # Claude Desktop — Homebrew cask (auto-updates itself once installed).
 APP_NAME="Claude Desktop"
+APP_CATEGORY="AI"
 
 claude_install()   { cask_install claude; }
 claude_update()    { cask_update claude; }

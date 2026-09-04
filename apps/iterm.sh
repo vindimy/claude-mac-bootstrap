@@ -2,6 +2,7 @@
 # shellcheck disable=SC2034
 # iTerm2 — Homebrew cask (auto-updates itself once installed).
 APP_NAME="iTerm2"
+APP_CATEGORY="System Tools"
 
 iterm_install()   { cask_install iterm2; }
 iterm_update()    { cask_update iterm2; }

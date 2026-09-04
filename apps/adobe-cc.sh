@@ -5,6 +5,7 @@
 # Uninstalling the cask removes only the CC desktop app, not Adobe apps
 # installed through it — remove those from the CC app first.
 APP_NAME="Adobe Creative Cloud"
+APP_CATEGORY="Creative"
 APP_NOTE="Sign in to the Creative Cloud app after install, then install individual Adobe apps from it."
 
 adobe_cc_install()   { cask_install adobe-creative-cloud; }
