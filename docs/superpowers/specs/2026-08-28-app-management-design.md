@@ -90,10 +90,18 @@ of truth.
 |---|---|---|---|
 | `amneziavpn` | Amnezia VPN | brew cask | `amneziavpn` (no self-update; brew upgrades it); pkg installer, prompts for admin password and installs a launch daemon; server config/keys are imported manually in the app |
 
+**Added 2026-09-05** (Messaging — new category):
+
+| App id | Display name | Method | Source |
+|---|---|---|---|
+| `whatsapp` | WhatsApp | brew cask | `whatsapp` (self-updates); link the device from the phone via QR code |
+| `telegram` | Telegram Desktop | brew cask | `telegram-desktop` (self-updates) — the tdesktop build, installed as `Telegram Desktop.app`; deliberately not the `telegram` cask, which is the separate native Swift "Telegram for macOS" app. A manually installed `/Applications/Telegram.app` is not adopted (different bundle name) and must be removed by hand |
+
 **Categories (added 2026-09-04):** each `apps/*.sh` sets `APP_CATEGORY`
 (captured by `discover_apps` alongside `APP_NAME`/`APP_NOTE`); the `run.sh`
 checklist groups apps under category headers in the order AI, Browsers,
-Development, Creative, Cloud Storage, System Tools, VPN, with unknown/unset
+Development, Creative, Cloud Storage, System Tools, VPN, Messaging, with
+unknown/unset
 categories appended (unset falls back to "Other"). Toggle numbers remain the
 discovery index, so grouping never changes an app's number.
 

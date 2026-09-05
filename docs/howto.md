@@ -21,6 +21,7 @@ per app (apps with nothing beyond "it installs" are omitted).
 - [adobe-cc](#adobe-cc)
 - [hardening](#hardening)
 - [performance](#performance)
+- [telegram](#telegram)
 
 ## General: running the bootstrap
 
@@ -285,3 +286,15 @@ defaults read com.apple.assistant.support 'Assistant Enabled'   # 0
 silicon power defaults (`sleep 1 disksleep 10 powernap 1`; `disksleep 10` on
 battery), turns indexing back on for external volumes, re-enables the three
 agents and Siri, and deletes the remaining managed keys.
+
+## telegram
+
+- The unit installs the `telegram-desktop` cask (tdesktop build, bundle id
+  `com.tdesktop.Telegram`), which lands as `/Applications/Telegram Desktop.app`.
+  The `telegram` cask is a different app (the native Swift "Telegram for
+  macOS") and is intentionally not used.
+- A Telegram Desktop that was installed by hand lives at
+  `/Applications/Telegram.app`, so `brew --adopt` does not match it and you end
+  up with two copies. After the first managed install, quit the old one and
+  remove it (and any stray `/Applications/Telegram.localized` folder). Chats
+  and login carry over — they live in `~/Library/Application Support/Telegram Desktop`.
