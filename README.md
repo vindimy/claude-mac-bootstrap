@@ -45,6 +45,7 @@ case removals proceed without prompting and settings are kept.
 |---|---|---|
 | `dotfiles/.zprofile` | `~/.zprofile` and `~/.profile` (symlinks) | Login-shell env for zsh and bash: Homebrew, PATH, Java/Android; triggers the daily dropbox-ignore-git sweep |
 | `bin/dropbox-ignore-git.sh` | `~/.local/bin/dropbox-ignore-git.sh` (symlink) | Marks every `.git` dir under `~/Library/CloudStorage/Dropbox` with `com.dropbox.ignored=1` so Dropbox sync can never corrupt a git index; no-ops on machines without a Dropbox folder |
+| `dotfiles/.claude/settings.json` | not linked yet (asset only) | Global Claude Code settings: enabled plugins, tool deny list, skill visibility, feature flags. Lean profile from the 2026-09-05 system-prompt trim; `~/.claude` itself stays per-machine and is git-ignored apart from this file |
 
 ## Managed apps
 

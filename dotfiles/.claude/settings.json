@@ -1,0 +1,255 @@
+{
+  "includeCoAuthoredBy": false,
+  "model": "claude-fable-5-1[1m]",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/dv/.claude/hooks/context-mode-cache-heal.mjs\""
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "\"/opt/homebrew/bin/node\" \"/Users/dv/.claude/hooks/gsd-statusline.js\""
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "claude-mem@thedotmack": false,
+    "andrej-karpathy-skills@karpathy-skills": false,
+    "frontend-design@claude-plugins-official": true,
+    "cloudflare@cloudflare": false,
+    "understand-anything@understand-anything": false,
+    "context-mode@context-mode": true,
+    "mattpocock-skills@claude-plugins-official": true,
+    "example-skills@anthropic-agent-skills": false,
+    "document-skills@anthropic-agent-skills": false,
+    "humanizer@humanizer": false,
+    "ecc@ecc": false
+  },
+  "extraKnownMarketplaces": {
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    },
+    "karpathy-skills": {
+      "source": {
+        "source": "github",
+        "repo": "forrestchang/andrej-karpathy-skills"
+      }
+    },
+    "cloudflare": {
+      "source": {
+        "source": "github",
+        "repo": "cloudflare/skills"
+      }
+    },
+    "understand-anything": {
+      "source": {
+        "source": "github",
+        "repo": "Egonex-AI/Understand-Anything"
+      }
+    },
+    "anthropic-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
+    },
+    "humanizer": {
+      "source": {
+        "source": "github",
+        "repo": "blader/humanizer"
+      }
+    },
+    "ecc": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/affaan-m/ECC.git"
+      }
+    }
+  },
+  "sandbox": {
+    "enabled": false,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": true
+  },
+  "effortLevel": "high",
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "auto",
+  "agentPushNotifEnabled": false,
+  "disableBundledSkills": true,
+  "disableWorkflows": true,
+  "disableRemoteControl": true,
+  "disableClaudeAiConnectors": true,
+  "enableArtifact": false,
+  "permissions": {
+    "deny": [
+      "DesignSync",
+      "NotebookEdit",
+      "SendMessage",
+      "PushNotification",
+      "RemoteTrigger",
+      "ScheduleWakeup",
+      "CronCreate",
+      "CronDelete",
+      "CronList",
+      "EnterPlanMode",
+      "ExitPlanMode",
+      "EndConversation",
+      "SendFeedback",
+      "Monitor",
+      "EnterWorktree",
+      "ExitWorktree",
+      "ListAgents",
+      "TaskOutput",
+      "ListMcpResourcesTool",
+      "ReadMcpResourceTool",
+      "ReadMcpResourceDirTool"
+    ]
+  },
+  "skillOverrides": {
+    "agent-md-refactor": "user-invocable-only",
+    "backend-to-frontend-handoff-docs": "user-invocable-only",
+    "c4-architecture": "user-invocable-only",
+    "caveman": "user-invocable-only",
+    "changelog-generator": "user-invocable-only",
+    "claude-handoff": "user-invocable-only",
+    "codex": "user-invocable-only",
+    "command-creator": "user-invocable-only",
+    "competitive-ads-extractor": "user-invocable-only",
+    "composio": "user-invocable-only",
+    "connect": "user-invocable-only",
+    "connect-apps": "user-invocable-only",
+    "content-research-writer": "user-invocable-only",
+    "database-schema-designer": "user-invocable-only",
+    "decision-mapping": "user-invocable-only",
+    "dependency-updater": "user-invocable-only",
+    "design-an-interface": "user-invocable-only",
+    "design-system-starter": "user-invocable-only",
+    "developer-growth-analysis": "user-invocable-only",
+    "difficult-workplace-conversations": "user-invocable-only",
+    "domain-name-brainstormer": "user-invocable-only",
+    "draw-io": "user-invocable-only",
+    "edit-article": "user-invocable-only",
+    "feedback-mastery": "user-invocable-only",
+    "file-organizer": "user-invocable-only",
+    "frontend-to-backend-requirements": "user-invocable-only",
+    "game-changing-features": "user-invocable-only",
+    "gemini": "user-invocable-only",
+    "gepetto": "user-invocable-only",
+    "git-guardrails-claude-code": "user-invocable-only",
+    "gsd-add-tests": "user-invocable-only",
+    "gsd-ai-integration-phase": "user-invocable-only",
+    "gsd-audit-fix": "user-invocable-only",
+    "gsd-audit-milestone": "user-invocable-only",
+    "gsd-audit-uat": "user-invocable-only",
+    "gsd-autonomous": "user-invocable-only",
+    "gsd-capture": "user-invocable-only",
+    "gsd-cleanup": "user-invocable-only",
+    "gsd-code-review": "user-invocable-only",
+    "gsd-complete-milestone": "user-invocable-only",
+    "gsd-config": "user-invocable-only",
+    "gsd-debug": "user-invocable-only",
+    "gsd-discuss-phase": "user-invocable-only",
+    "gsd-docs-update": "user-invocable-only",
+    "gsd-eval-review": "user-invocable-only",
+    "gsd-execute-phase": "user-invocable-only",
+    "gsd-explore": "user-invocable-only",
+    "gsd-extract-learnings": "user-invocable-only",
+    "gsd-fast": "user-invocable-only",
+    "gsd-forensics": "user-invocable-only",
+    "gsd-graphify": "user-invocable-only",
+    "gsd-health": "user-invocable-only",
+    "gsd-help": "user-invocable-only",
+    "gsd-import": "user-invocable-only",
+    "gsd-inbox": "user-invocable-only",
+    "gsd-ingest-docs": "user-invocable-only",
+    "gsd-manager": "user-invocable-only",
+    "gsd-map-codebase": "user-invocable-only",
+    "gsd-milestone-summary": "user-invocable-only",
+    "gsd-mvp-phase": "user-invocable-only",
+    "gsd-new-milestone": "user-invocable-only",
+    "gsd-new-project": "user-invocable-only",
+    "gsd-ns-context": "user-invocable-only",
+    "gsd-ns-ideate": "user-invocable-only",
+    "gsd-ns-manage": "user-invocable-only",
+    "gsd-ns-project": "user-invocable-only",
+    "gsd-ns-review": "user-invocable-only",
+    "gsd-ns-workflow": "user-invocable-only",
+    "gsd-pause-work": "user-invocable-only",
+    "gsd-phase": "user-invocable-only",
+    "gsd-plan-phase": "user-invocable-only",
+    "gsd-plan-review-convergence": "user-invocable-only",
+    "gsd-pr-branch": "user-invocable-only",
+    "gsd-profile-user": "user-invocable-only",
+    "gsd-progress": "user-invocable-only",
+    "gsd-quick": "user-invocable-only",
+    "gsd-resume-work": "user-invocable-only",
+    "gsd-review": "user-invocable-only",
+    "gsd-review-backlog": "user-invocable-only",
+    "gsd-secure-phase": "user-invocable-only",
+    "gsd-settings": "user-invocable-only",
+    "gsd-ship": "user-invocable-only",
+    "gsd-sketch": "user-invocable-only",
+    "gsd-spec-phase": "user-invocable-only",
+    "gsd-spike": "user-invocable-only",
+    "gsd-stats": "user-invocable-only",
+    "gsd-surface": "user-invocable-only",
+    "gsd-thread": "user-invocable-only",
+    "gsd-ui-phase": "user-invocable-only",
+    "gsd-ui-review": "user-invocable-only",
+    "gsd-ultraplan-phase": "user-invocable-only",
+    "gsd-undo": "user-invocable-only",
+    "gsd-update": "user-invocable-only",
+    "gsd-validate-phase": "user-invocable-only",
+    "gsd-verify-work": "user-invocable-only",
+    "gsd-workspace": "user-invocable-only",
+    "gsd-workstreams": "user-invocable-only",
+    "image-enhancer": "user-invocable-only",
+    "invoice-organizer": "user-invocable-only",
+    "langsmith-fetch": "user-invocable-only",
+    "lead-research-assistant": "user-invocable-only",
+    "learned": "user-invocable-only",
+    "lesson-learned": "user-invocable-only",
+    "loop-me": "user-invocable-only",
+    "meeting-insights-analyzer": "user-invocable-only",
+    "migrate-to-shoehorn": "user-invocable-only",
+    "mui": "user-invocable-only",
+    "naming-analyzer": "user-invocable-only",
+    "obsidian-vault": "user-invocable-only",
+    "plugin-forge": "user-invocable-only",
+    "professional-communication": "user-invocable-only",
+    "qa": "user-invocable-only",
+    "qa-test-planner": "user-invocable-only",
+    "raffle-winner-picker": "user-invocable-only",
+    "reducing-entropy": "user-invocable-only",
+    "request-refactor-plan": "user-invocable-only",
+    "requirements-clarity": "user-invocable-only",
+    "review": "user-invocable-only",
+    "scaffold-exercises": "user-invocable-only",
+    "session-handoff": "user-invocable-only",
+    "setup-pre-commit": "user-invocable-only",
+    "ship-learn-next": "user-invocable-only",
+    "skill-judge": "user-invocable-only",
+    "skill-share": "user-invocable-only",
+    "tailored-resume-generator": "user-invocable-only",
+    "template-skill": "user-invocable-only",
+    "twitter-algorithm-optimizer": "user-invocable-only",
+    "ubiquitous-language": "user-invocable-only",
+    "video-downloader": "user-invocable-only",
+    "write-a-skill": "user-invocable-only",
+    "writing-beats": "user-invocable-only",
+    "writing-clearly-and-concisely": "user-invocable-only",
+    "writing-fragments": "user-invocable-only",
+    "writing-shape": "user-invocable-only",
+    "zoom-out": "user-invocable-only"
+  }
+}
