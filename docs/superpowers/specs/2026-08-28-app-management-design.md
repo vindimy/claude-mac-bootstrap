@@ -84,10 +84,16 @@ of truth.
 |---|---|---|---|
 | `sublime-text` | Sublime Text | brew cask | `sublime-text` (self-updates); license activation is manual (unlicensed build is fully functional with purchase reminders) |
 
+**Added 2026-09-05** (VPN — new category, Amnezia the only choice for now):
+
+| App id | Display name | Method | Source |
+|---|---|---|---|
+| `amneziavpn` | Amnezia VPN | brew cask | `amneziavpn` (no self-update; brew upgrades it); pkg installer, prompts for admin password and installs a launch daemon; server config/keys are imported manually in the app |
+
 **Categories (added 2026-09-04):** each `apps/*.sh` sets `APP_CATEGORY`
 (captured by `discover_apps` alongside `APP_NAME`/`APP_NOTE`); the `run.sh`
 checklist groups apps under category headers in the order AI, Browsers,
-Development, Creative, Cloud Storage, System Tools, with unknown/unset
+Development, Creative, Cloud Storage, System Tools, VPN, with unknown/unset
 categories appended (unset falls back to "Other"). Toggle numbers remain the
 discovery index, so grouping never changes an app's number.
 

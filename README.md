@@ -83,9 +83,10 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `codex` | Codex CLI | brew cask `codex` (binary release; brew-updated) |
 | `antigravity` | Google Antigravity | brew cask `antigravity` (self-updates) |
 | `sublime-text` | Sublime Text | brew cask `sublime-text` (self-updates) |
+| `amneziavpn` | Amnezia VPN | brew cask `amneziavpn` (pkg installer; prompts for admin password) |
 
 The `run.sh` checklist groups apps by category (AI, Browsers, Development,
-Creative, Cloud Storage, System Tools) from each app's `APP_CATEGORY`; the
+Creative, Cloud Storage, System Tools, VPN) from each app's `APP_CATEGORY`; the
 numbers stay stable across groupings.
 
 The three agent-tooling units mirror the inventory in
