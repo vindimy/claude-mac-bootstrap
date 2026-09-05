@@ -10,14 +10,18 @@
 # docs/superpowers/specs/2026-09-04-macos-hardening-design.md
 APP_NAME="macOS Hardening"
 APP_CATEGORY="System Tools"
-APP_NOTE="Needs your admin password (sudo). Applies: app firewall + stealth + logging, guest login/SMB off, auto-login off, all automatic updates on, show all filename extensions, Touch ID for sudo. Only reports FileVault, SIP, Gatekeeper and SSH password auth (see docs/howto.md). Remote Login (SSH) is left as you set it."
+APP_NOTE="Needs your admin password (sudo). Applies: app firewall + stealth + logging, guest login/SMB off, auto-login off, automatic security updates on (macOS upgrades download but are NOT installed automatically), show all filename extensions, Touch ID for sudo. Only reports FileVault, SIP, Gatekeeper and SSH password auth (see docs/howto.md). Remote Login (SSH) is left as you set it."
 
 HARDENING_FW=/usr/libexec/ApplicationFirewall/socketfilterfw
 HARDENING_LOGINWINDOW=/Library/Preferences/com.apple.loginwindow
 HARDENING_SMB=/Library/Preferences/SystemConfiguration/com.apple.smb.server
 HARDENING_SWUPDATE=/Library/Preferences/com.apple.SoftwareUpdate
 HARDENING_COMMERCE=/Library/Preferences/com.apple.commerce
-HARDENING_SWUPDATE_KEYS="AutomaticCheckEnabled AutomaticDownload AutomaticallyInstallMacOSUpdates CriticalUpdateInstall ConfigDataInstall"
+# Security updates only: check, download, Rapid Security Responses / security
+# fixes (CriticalUpdateInstall) and system data files (ConfigDataInstall) are
+# on; installing macOS updates themselves stays a manual decision.
+HARDENING_SWUPDATE_KEYS="AutomaticCheckEnabled AutomaticDownload CriticalUpdateInstall ConfigDataInstall"
+HARDENING_SWUPDATE_OS_KEY="AutomaticallyInstallMacOSUpdates"
 HARDENING_SUDO_LOCAL=/etc/pam.d/sudo_local
 HARDENING_PAM_TID='auth       sufficient     pam_tid.so'
 
@@ -110,6 +114,10 @@ hardening_install() {
   for k in $HARDENING_SWUPDATE_KEYS; do
     run_cmd sudo defaults write "$HARDENING_SWUPDATE" "$k" -bool true || return 1
   done
+  # Written explicitly (not just left alone) so a machine hardened by the
+  # 2026-09-05 version, which turned it on, gets corrected.
+  run_cmd sudo defaults write "$HARDENING_SWUPDATE" "$HARDENING_SWUPDATE_OS_KEY" -bool false || return 1
+  # App Store app updates are not OS updates; they stay automatic.
   run_cmd sudo defaults write "$HARDENING_COMMERCE" AutoUpdate -bool true || return 1
   # Blocks invoice.pdf.app-style double-extension tricks in Finder.
   run_cmd defaults write NSGlobalDomain AppleShowAllExtensions -bool true || return 1
@@ -132,6 +140,7 @@ hardening_installed() {
   for k in $HARDENING_SWUPDATE_KEYS; do
     pref_is "$HARDENING_SWUPDATE" "$k" 1 || return 1
   done
+  pref_is "$HARDENING_SWUPDATE" "$HARDENING_SWUPDATE_OS_KEY" 0 || return 1
   pref_is "$HARDENING_COMMERCE" AutoUpdate 1 || return 1
   pref_is NSGlobalDomain AppleShowAllExtensions 1 || return 1
   if hardening_sudo_local_supported; then hardening_touchid_ok || return 1; fi
@@ -150,7 +159,7 @@ hardening_uninstall() {
   run_cmd sudo "$HARDENING_FW" --setglobalstate off --setstealthmode off --setloggingmode off
   pref_delete sudo "$HARDENING_LOGINWINDOW" GuestEnabled
   pref_delete sudo "$HARDENING_SMB" AllowGuestAccess
-  for k in $HARDENING_SWUPDATE_KEYS; do
+  for k in $HARDENING_SWUPDATE_KEYS $HARDENING_SWUPDATE_OS_KEY; do
     pref_delete sudo "$HARDENING_SWUPDATE" "$k"
   done
   pref_delete sudo "$HARDENING_COMMERCE" AutoUpdate

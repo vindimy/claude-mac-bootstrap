@@ -134,7 +134,7 @@ a setting therefore never fails on an already-clean machine.
 | Application firewall ON + stealth + logging | `sudo socketfilterfw --setglobalstate on --setstealthmode on --setloggingmode on` |
 | Guest login and SMB guest access off | `GuestEnabled false` in `/Library/Preferences/com.apple.loginwindow`; `AllowGuestAccess false` in `/Library/Preferences/SystemConfiguration/com.apple.smb.server` |
 | Automatic login disabled | `defaults delete .../com.apple.loginwindow autoLoginUser` (if present) |
-| All automatic software updates on | `AutomaticCheckEnabled`, `AutomaticDownload`, `AutomaticallyInstallMacOSUpdates`, `CriticalUpdateInstall`, `ConfigDataInstall` true in `/Library/Preferences/com.apple.SoftwareUpdate`; `AutoUpdate true` in `/Library/Preferences/com.apple.commerce` |
+| Automatic security updates on, macOS upgrades manual | `AutomaticCheckEnabled`, `AutomaticDownload`, `CriticalUpdateInstall` (security responses / security fixes), `ConfigDataInstall` (system data files) true and `AutomaticallyInstallMacOSUpdates` **false** in `/Library/Preferences/com.apple.SoftwareUpdate`; `AutoUpdate true` in `/Library/Preferences/com.apple.commerce` (App Store apps, not the OS). Corrected 2026-09-05 from "all updates on": OS installs reboot the machine and can break dev toolchains, so they stay a manual decision. |
 | Show all filename extensions | `NSGlobalDomain AppleShowAllExtensions true` (blocks `invoice.pdf.app` tricks) |
 | Touch ID for sudo | `auth sufficient pam_tid.so` appended to `/etc/pam.d/sudo_local` (never overwritten, so a `pam_reattach` line survives); skipped with a warning when `/etc/pam.d/sudo` has no `sudo_local` include |
 

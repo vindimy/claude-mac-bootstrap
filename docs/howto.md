@@ -179,9 +179,12 @@ restores macOS defaults. Every run asks for your admin password once.
 Design and rationale: `docs/superpowers/specs/2026-09-04-macos-hardening-design.md`.
 
 **What it changes:** application firewall on with stealth mode and logging;
-guest login and SMB guest access off; automatic login removed; every automatic
-software-update option on (including macOS and App Store); all filename
-extensions shown in Finder; Touch ID accepted by `sudo`.
+guest login and SMB guest access off; automatic login removed; automatic
+updates set to security-only — check, download, security responses and system
+data files on, App Store app updates on, but **macOS updates are not installed
+automatically** (they download and wait for you in System Settings > General >
+Software Update); all filename extensions shown in Finder; Touch ID accepted
+by `sudo`.
 
 **What it only reports** (warnings, never changed for you):
 
@@ -212,7 +215,8 @@ Touch ID the line is harmless — sudo falls through to the password prompt.
 ```sh
 /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate --getstealthmode --getloggingmode
 defaults read /Library/Preferences/com.apple.loginwindow GuestEnabled          # 0
-defaults read /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates  # 1
+defaults read /Library/Preferences/com.apple.SoftwareUpdate CriticalUpdateInstall              # 1
+defaults read /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates  # 0
 cat /etc/pam.d/sudo_local
 ```
 
