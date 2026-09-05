@@ -19,6 +19,8 @@ per app (apps with nothing beyond "it installs" are omitted).
 - [xcode](#xcode)
 - [android-studio](#android-studio)
 - [adobe-cc](#adobe-cc)
+- [hardening](#hardening)
+- [performance](#performance)
 
 ## General: running the bootstrap
 
@@ -168,3 +170,103 @@ docker context, so existing projects work unchanged:
 - The cask installs only the Creative Cloud desktop app. Sign in, then
   install individual Adobe apps from inside it. Uninstalling the cask removes
   only the CC app itself.
+
+## hardening
+
+A settings unit, not an app: selecting it applies a security baseline, every
+`update.sh` run re-applies it (drift correction), and deselecting with `zap`
+restores macOS defaults. Every run asks for your admin password once.
+Design and rationale: `docs/superpowers/specs/2026-09-04-macos-hardening-design.md`.
+
+**What it changes:** application firewall on with stealth mode and logging;
+guest login and SMB guest access off; automatic login removed; every automatic
+software-update option on (including macOS and App Store); all filename
+extensions shown in Finder; Touch ID accepted by `sudo`.
+
+**What it only reports** (warnings, never changed for you):
+
+- FileVault off → System Settings > Privacy & Security > FileVault. Save the
+  recovery key. Skip this on a machine that runs colima at boot — that needs
+  FileVault off.
+- SIP disabled → boot to Recovery, run `csrutil enable`.
+- Gatekeeper off → System Settings > Privacy & Security; `spctl` can no
+  longer turn it back on since Sequoia.
+- SSH accepts passwords while Remote Login is on. Remote Login itself is left
+  alone. To go key-only, first confirm your key works, then:
+
+  ```sh
+  sudo tee /etc/ssh/sshd_config.d/010-keys-only.conf >/dev/null <<'EOF'
+  PasswordAuthentication no
+  KbdInteractiveAuthentication no
+  EOF
+  sudo launchctl kickstart -k system/com.openssh.sshd
+  ```
+
+**Touch ID for sudo** is one line in `/etc/pam.d/sudo_local`, which survives
+OS updates. The unit appends, never overwrites, so a hand-added `pam_reattach`
+line (for tmux) stays and keeps its place ahead of `pam_tid`. On a Mac without
+Touch ID the line is harmless — sudo falls through to the password prompt.
+
+**Verify after applying:**
+
+```sh
+/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate --getstealthmode --getloggingmode
+defaults read /Library/Preferences/com.apple.loginwindow GuestEnabled          # 0
+defaults read /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates  # 1
+cat /etc/pam.d/sudo_local
+```
+
+Finder needs a relaunch (`killall Finder`) to show extensions everywhere.
+
+## performance
+
+A settings unit like `hardening`: applied on selection, re-applied on every
+update, `zap` restores defaults. Needs sudo. Some changes (Siri, Handoff,
+Apple Intelligence) fully take effect after logout or restart.
+
+**What it changes:**
+
+- Power: on AC the Mac never sleeps, disks never sleep, Power Nap is off. On
+  battery only disk sleep is turned off; everything else stays default. This
+  is what keeps the Mac mini up for colima and SSH without touching the
+  MacBook Air's battery life. `disksleep 0` only stops macOS from spinning
+  drives down — a drive whose own firmware has an idle timer still sleeps and
+  needs the vendor's tool (e.g. Seagate/WD dashboard).
+- Spotlight: indexing off on every mounted external volume. Re-run
+  `./update.sh` after attaching a new drive to cover it. To also drop an
+  existing index and reclaim the space on a drive: `sudo mdutil -E /Volumes/<name>`
+  (with indexing already off this erases without rebuilding).
+- Off: Siri (agent + menu item), Apple Intelligence (macOS 15+; nothing to do
+  on Sonoma), Photos and media analysis agents (`photoanalysisd`,
+  `mediaanalysisd` — Photos face/scene search stops working), Handoff, crash
+  report dialogs, and analytics upload to Apple.
+
+**Manual steps it prints every run:**
+
+- Spotlight indexes `~/Library/Caches` (tens of thousands of items on a dev
+  machine). The privacy list is not scriptable without disabling SIP, so once
+  per machine: System Settings > Siri & Spotlight > Spotlight Privacy…
+  (Search Privacy… on macOS 15+) > `+` > press Cmd-Shift-G and enter
+  `~/Library/Caches` > Open > Done.
+- Siri Suggestions in Spotlight: System Settings > Siri & Spotlight >
+  Spotlight > uncheck "Siri Suggestions".
+
+**TRIM** is reported per SSD, never forced. Internal SSDs and Thunderbolt /
+USB4 NVMe enclosures negotiate TRIM automatically under APFS. Plain USB
+enclosures never get TRIM on macOS and `trimforce` does not change that (it
+only affects SATA third-party SSDs). If an external SSD shows `TRIM Support:
+No`, the fix is a Thunderbolt/USB4 enclosure, not a command.
+
+**Verify after applying:**
+
+```sh
+pmset -g custom                                  # AC Power: sleep 0, disksleep 0, powernap 0
+mdutil -s -a                                     # externals: Indexing disabled
+launchctl print-disabled gui/$(id -u) | grep -E 'Siri.agent|photoanalysisd|mediaanalysisd'
+defaults read com.apple.assistant.support 'Assistant Enabled'   # 0
+```
+
+**Reverting** (`run.sh`, deselect, choose `zap`) restores the recorded Apple
+silicon power defaults (`sleep 1 disksleep 10 powernap 1`; `disksleep 10` on
+battery), turns indexing back on for external volumes, re-enables the three
+agents and Siri, and deletes the remaining managed keys.

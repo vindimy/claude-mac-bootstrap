@@ -84,6 +84,8 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `antigravity` | Google Antigravity | brew cask `antigravity` (self-updates) |
 | `sublime-text` | Sublime Text | brew cask `sublime-text` (self-updates) |
 | `amneziavpn` | Amnezia VPN | brew cask `amneziavpn` (pkg installer; prompts for admin password) |
+| `hardening` | macOS Hardening (settings, not an app) | `socketfilterfw`, `defaults`, `/etc/pam.d/sudo_local` via sudo: app firewall + stealth + logging, guest/auto-login off, all auto-updates on, show all extensions, Touch ID for sudo; reports FileVault/SIP/Gatekeeper/SSH-password-auth; re-applied on every update; `zap` restores defaults |
+| `performance` | macOS Performance Tuning (settings, not an app) | `pmset`, `mdutil`, `launchctl`, `defaults` via sudo: never sleep on AC, disks never sleep, Power Nap off, Spotlight off on external volumes, Siri + Apple Intelligence (15+) + Photos analysis + Handoff + crash/analytics reporting off; reports TRIM and manual Spotlight steps; `zap` restores defaults |
 
 The `run.sh` checklist groups apps by category (AI, Browsers, Development,
 Creative, Cloud Storage, System Tools, VPN) from each app's `APP_CATEGORY`; the

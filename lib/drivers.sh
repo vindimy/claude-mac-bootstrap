@@ -139,3 +139,30 @@ dmg_uninstall() {
     fi
   fi
 }
+
+# ---- macOS preferences (`defaults`) ----------------------------------------
+# For settings units (hardening, performance) whose "install" is a set of
+# system/user preferences. Reads never need root; writes to /Library/... do,
+# so callers pass `sudo` explicitly where required.
+
+# pref_is [-currentHost] domain key expected -> 0 if the stored value prints
+# as `expected` (booleans print as 1/0). Missing key or domain -> 1.
+pref_is() {
+  local host=""
+  if [ "${1:-}" = -currentHost ]; then host=-currentHost; shift; fi
+  # shellcheck disable=SC2086
+  [ "$(defaults $host read "$1" "$2" 2>/dev/null)" = "$3" ]
+}
+
+# pref_delete [sudo] [-currentHost] domain key -> remove a key only when it is
+# present, so reverting a setting never fails on an already-clean machine.
+pref_delete() {
+  local su="" host=""
+  if [ "${1:-}" = sudo ]; then su=sudo; shift; fi
+  if [ "${1:-}" = -currentHost ]; then host=-currentHost; shift; fi
+  # shellcheck disable=SC2086
+  if defaults $host read "$1" "$2" >/dev/null 2>&1; then
+    # shellcheck disable=SC2086
+    run_cmd $su defaults $host delete "$1" "$2"
+  fi
+}
