@@ -108,6 +108,17 @@ docker context, so existing projects work unchanged:
   current.
 - If `claude` is not found in a fresh shell, `~/.local/bin` is missing from
   PATH — the managed `.zprofile` adds it at next login.
+- `~/.claude/settings.json` is managed: the unit copies
+  `dotfiles/.claude/settings.json` over it on install and on every
+  `update.sh` run whenever the two differ. To change a global setting, edit
+  the repo file and commit — anything changed in the live file (by hand or
+  by Claude Code via `/model`, `/theme`, `/plugin`, `claude plugin install`)
+  is discarded at the next run. The first differing live file is kept once
+  as `~/.claude/settings.json.pre-bootstrap.bak`.
+- The `claude-plugins` unit re-applies the settings after installing
+  plugins, because `claude plugin install` marks each plugin enabled and the
+  managed profile keeps part of the roster installed-but-disabled.
+- `--dry-run` prints the copy without touching the live file.
 
 ## claude-plugins
 

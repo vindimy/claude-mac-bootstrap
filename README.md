@@ -45,7 +45,7 @@ case removals proceed without prompting and settings are kept.
 |---|---|---|
 | `dotfiles/.zprofile` | `~/.zprofile` and `~/.profile` (symlinks) | Login-shell env for zsh and bash: Homebrew, PATH, Java/Android; triggers the daily dropbox-ignore-git sweep |
 | `bin/dropbox-ignore-git.sh` | `~/.local/bin/dropbox-ignore-git.sh` (symlink) | Marks every `.git` dir under `~/Library/CloudStorage/Dropbox` with `com.dropbox.ignored=1` so Dropbox sync can never corrupt a git index; no-ops on machines without a Dropbox folder |
-| `dotfiles/.claude/settings.json` | not linked yet (asset only) | Global Claude Code settings: enabled plugins, tool deny list, skill visibility, feature flags. Lean profile from the 2026-09-05 system-prompt trim; `~/.claude` itself stays per-machine and is git-ignored apart from this file |
+| `dotfiles/.claude/settings.json` | `~/.claude/settings.json` (copy, written by the `claude-code` unit on every install/update) | Global Claude Code settings: enabled plugins, tool deny list, skill visibility, feature flags. Lean profile from the 2026-09-05 system-prompt trim. The repo copy is authoritative: local edits (including ones Claude Code makes itself) are overwritten on the next run, so change the repo file instead. A copy rather than a symlink because Claude Code rewrites the file; `~/.claude` otherwise stays per-machine and is git-ignored apart from this file |
 
 ## Managed apps
 
@@ -66,7 +66,7 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `little-snitch` | Little Snitch | brew cask `little-snitch`; system-extension approval + license are manual |
 | `controld` | Control D GUI utility | vendor dmg from assets.controld.com (self-updates) |
 | `claude` | Claude Desktop | brew cask `claude` (self-updates) |
-| `claude-code` | Claude Code | native installer `claude.ai/install.sh` (self-updates); brew cask dropped — it trails releases |
+| `claude-code` | Claude Code | native installer `claude.ai/install.sh` (self-updates); brew cask dropped — it trails releases; also copies `dotfiles/.claude/settings.json` to `~/.claude/settings.json` (repo wins; re-applied on every update) |
 | `gemini` | Google Gemini Desktop | brew cask `google-gemini` (self-updates) |
 | `gemini-cli` | Gemini CLI | brew formula `gemini-cli` |
 | `chatgpt` | ChatGPT | brew cask `chatgpt` (self-updates) |

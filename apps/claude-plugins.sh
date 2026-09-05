@@ -42,6 +42,14 @@ claude_plugins_install() {
       return 1
     fi
   done
+  # `claude plugin install` flips enabledPlugins.<p>=true in
+  # ~/.claude/settings.json, but the managed settings deliberately keep some
+  # of the roster installed-but-disabled. Re-apply the repo copy so the
+  # profile wins even on a fresh machine (both units are sourced into the
+  # same shell by discover_apps, so the claude-code helper is available).
+  if command -v claude_code_settings_apply >/dev/null 2>&1; then
+    claude_code_settings_apply
+  fi
 }
 
 claude_plugins_update() {
