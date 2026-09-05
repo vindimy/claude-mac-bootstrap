@@ -2,13 +2,16 @@
 # shellcheck disable=SC2034
 # Claude Code plugins — the 12-plugin roster from 9 marketplaces, per the
 # inventory in claude-nyamaste-studios-strategy/tech/skills.md (2026-08-27);
-# ecc (Everything Claude Code, affaan-m/ecc) added 2026-09-04.
+# ecc (Everything Claude Code, affaan-m/ecc) added 2026-09-04. Registered by
+# git URL, not owner/repo shorthand: the managed settings.json declares the
+# marketplace as {"source":"git","url":".../ECC.git"} and the CLI refuses to
+# add a marketplace whose source kind differs from that declaration.
 # Managed headlessly via the `claude plugin` CLI; requires the claude-code app.
 APP_NAME="Claude Code plugins"
 APP_CATEGORY="AI"
 APP_NOTE="Restart Claude Code (new session) so freshly installed/updated plugins load."
 
-CLAUDE_PLUGIN_MARKETPLACES="anthropics/claude-plugins-official mksglu/context-mode thedotmack/claude-mem forrestchang/andrej-karpathy-skills cloudflare/skills Egonex-AI/Understand-Anything anthropics/skills blader/humanizer affaan-m/ecc"
+CLAUDE_PLUGIN_MARKETPLACES="anthropics/claude-plugins-official mksglu/context-mode thedotmack/claude-mem forrestchang/andrej-karpathy-skills cloudflare/skills Egonex-AI/Understand-Anything anthropics/skills blader/humanizer https://github.com/affaan-m/ECC.git"
 
 CLAUDE_PLUGINS="superpowers@claude-plugins-official frontend-design@claude-plugins-official mattpocock-skills@claude-plugins-official context-mode@context-mode claude-mem@thedotmack andrej-karpathy-skills@karpathy-skills cloudflare@cloudflare understand-anything@understand-anything example-skills@anthropic-agent-skills document-skills@anthropic-agent-skills humanizer@humanizer ecc@ecc"
 
