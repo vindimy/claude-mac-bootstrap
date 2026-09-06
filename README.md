@@ -84,6 +84,7 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `codex` | Codex CLI | brew cask `codex` (binary release; brew-updated) |
 | `antigravity` | Google Antigravity | brew cask `antigravity` (self-updates) |
 | `sublime-text` | Sublime Text | brew cask `sublime-text` (self-updates) |
+| `markviewer` | MarkViewer (markdown viewer) | brew cask `markviewer` (self-updates) |
 | `amneziavpn` | Amnezia VPN | brew cask `amneziavpn` (pkg installer; prompts for admin password) |
 | `whatsapp` | WhatsApp | brew cask `whatsapp` (self-updates) |
 | `telegram` | Telegram Desktop | brew cask `telegram-desktop` (self-updates); not the `telegram` cask (native Swift build) — see [docs/howto.md](docs/howto.md#telegram) |

@@ -97,6 +97,12 @@ of truth.
 | `whatsapp` | WhatsApp | brew cask | `whatsapp` (self-updates); link the device from the phone via QR code |
 | `telegram` | Telegram Desktop | brew cask | `telegram-desktop` (self-updates) — the tdesktop build, installed as `Telegram Desktop.app`; deliberately not the `telegram` cask, which is the separate native Swift "Telegram for macOS" app. A manually installed `/Applications/Telegram.app` is not adopted (different bundle name) and must be removed by hand |
 
+**Added 2026-09-05** (Development):
+
+| App id | Display name | Method | Source |
+|---|---|---|---|
+| `markviewer` | MarkViewer | brew cask | `markviewer` (self-updates); markdown viewer/editor. A manually installed `/Applications/MarkViewer.app` is adopted by `brew --adopt` (same bundle name) |
+
 **Categories (added 2026-09-04):** each `apps/*.sh` sets `APP_CATEGORY`
 (captured by `discover_apps` alongside `APP_NAME`/`APP_NOTE`); the `run.sh`
 checklist groups apps under category headers in the order AI, Browsers,
