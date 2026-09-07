@@ -59,7 +59,7 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 
 | App id | App | How |
 |---|---|---|
-| `chrome` | Google Chrome | brew cask `google-chrome` (self-updates) |
+| `chrome` | Google Chrome | vendor dmg from dl.google.com (self-updates); brew cask dropped |
 | `dropbox` | Dropbox | brew cask `dropbox` (self-updates) |
 | `firefox` | Firefox | vendor dmg from download.mozilla.org (self-updates); brew cask dropped |
 | `google-drive` | Google Drive | brew cask `google-drive` (self-updates) |
