@@ -61,7 +61,7 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 |---|---|---|
 | `chrome` | Google Chrome | brew cask `google-chrome` (self-updates) |
 | `dropbox` | Dropbox | brew cask `dropbox` (self-updates) |
-| `firefox` | Firefox | brew cask `firefox` |
+| `firefox` | Firefox | vendor dmg from download.mozilla.org (self-updates); brew cask dropped |
 | `google-drive` | Google Drive | brew cask `google-drive` (self-updates) |
 | `little-snitch` | Little Snitch | brew cask `little-snitch`; system-extension approval + license are manual |
 | `controld` | Control D GUI utility | vendor dmg from assets.controld.com (self-updates) |
