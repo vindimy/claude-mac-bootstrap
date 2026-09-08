@@ -40,7 +40,7 @@ assert_fail "purged" test -e "$HOME/.agents/skills/oldcopy"
 rm -rf "$HOME/.agents/skills/beta"
 assert_fail "missing selected skill -> not installed" skills_unit_installed "$UNIT" "$ROSTER"
 mkdir -p "$HOME/.agents/skills/beta"
-rm -rf "$HOME/.codex/skills"
+rm -rf "$HOME/.codex"
 assert_ok "missing codex dir does not fail installed" skills_unit_installed "$UNIT" "$ROSTER"
 mkdir -p "$HOME/.codex/skills"
 

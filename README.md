@@ -82,7 +82,7 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `claude-plugins` | Claude Code plugins (11 from 9 marketplaces) | `claude plugin` CLI; needs `claude-code` |
 | `gsd` | GSD skill suite (67 `gsd-*` skills) | npm `get-shit-done-cc` (installs Node if needed) |
 | `agent-skills` | Agent skills, curated task packs (6 repos: softaworks/agent-toolkit, composio, coreyhaines31/marketingskills, lyndonkl/claude, alirezarezvani/claude-skills, ComposioHQ/awesome-claude-skills) | skills.sh CLI (`npx skills`); per-repo checklist on first install, saved in `~/.mac-bootstrap/skills.conf`; roster in `apps/agent-skills.sh` |
-| `agent-skill-suites` | Agent skill suites (obra/superpowers → Codex only, mattpocock/skills, open-gsd/gsd-pi, NeoLabHQ/context-engineering-kit) | skills.sh CLI; same checklist/selection model; `*` selections track upstream additions and removals; roster in `apps/agent-skill-suites.sh` |
+| `agent-skill-suites` | Agent skill suites (obra/superpowers for Codex only — no Claude Code duplicate, mattpocock/skills, open-gsd/gsd-pi, NeoLabHQ/context-engineering-kit) | skills.sh CLI; same checklist/selection model; `*` selections track upstream additions and removals; roster in `apps/agent-skill-suites.sh` |
 | `codex` | Codex CLI | brew cask `codex` (binary release; brew-updated) |
 | `antigravity` | Google Antigravity | brew cask `antigravity` (self-updates) |
 | `sublime-text` | Sublime Text | brew cask `sublime-text` (self-updates) |

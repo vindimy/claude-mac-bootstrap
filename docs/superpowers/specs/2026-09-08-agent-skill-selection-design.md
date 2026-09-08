@@ -1,6 +1,6 @@
 # Agent Skill Selection Design
 
-**Status: approved 2026-09-08 (rev 2), not yet implemented.** Supersedes the
+**Status: implemented 2026-09-08 (rev 2)** — plan in `docs/superpowers/plans/2026-09-08-agent-skill-selection.md`, engine in `lib/skills.sh`, tests in `tests/`. Supersedes the
 "deliberately not managed" stance recorded in the header of
 `apps/agent-skills.sh` and in README/howto. Rev 2 adds: awesome-claude-skills
 managed from its upstream, removal of the culled mattpocock copies, the
@@ -49,6 +49,15 @@ Verified 2026-09-08:
   mattpocock copies, 19 awesome-claude-skills copies and graphify described in
   the inventory are absent here (the "sync manually" step never happened),
   which is the failure this design removes.
+
+Live run 2026-09-08 on dvBook: store went from 30 to 150 skills, lock sources
+are exactly the ten roster repos, `skills.conf` holds `*` for superpowers,
+mattpocock and gsd-pi and explicit lists for the rest. One correction to the
+design text: the skills CLI treats Codex as reading `~/.agents/skills`
+directly and creates no links under `~/.codex/skills`, so "linked only into
+Codex" means "installed to the store without a Claude Code link". Readiness
+for a named agent therefore checks the agent's home dir (`~/.codex`), not a
+skills subdir.
 
 ## Decisions
 
@@ -348,7 +357,7 @@ pass on this machine:
 3. Live first install of `agent-skill-suites` via `./run.sh`: four checklists
    appear with the right defaults; `skills.conf` has `*` for superpowers,
    mattpocock and gsd-pi and the 22 names for the kit; store contains the
-   selected names; superpowers links exist only under `~/.codex/skills`;
+   selected names; superpowers is absent from `~/.claude/skills` (Codex reads the store directly);
    `graphify` absent; `claude plugin list` no longer shows mattpocock-skills.
 4. Purge: plant an untracked `~/.agents/skills/caveman` and
    `~/.claude/skills/video-downloader`, run `./update.sh`, confirm both are

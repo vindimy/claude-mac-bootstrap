@@ -157,10 +157,12 @@ docker context, so existing projects work unchanged:
 - **Where it is saved.** `~/.mac-bootstrap/skills.conf`, one `SKILLS_<repo>`
   line per repo. Editing it by hand and running `./update.sh` is a valid way
   to change a selection on a headless machine.
-- **superpowers** is linked into Codex only: Claude Code keeps the
-  `superpowers` plugin (its SessionStart hook is what makes it fire), and a
-  store copy under `~/.claude/skills` would list every skill twice. If
-  `~/.codex/skills` does not exist yet, the repo is skipped and installed on
+- **superpowers** is installed for Codex only (`-a codex`): Claude Code keeps
+  the `superpowers` plugin (its SessionStart hook is what makes it fire), and
+  a link under `~/.claude/skills` would list every skill twice. Codex reads
+  the shared store `~/.agents/skills` directly, so the CLI creates no links
+  for it — `~/.codex/skills` staying empty is expected. If `~/.codex` does
+  not exist yet (Codex not installed), the repo is skipped and installed on
   the next update.
 - **mattpocock-skills plugin.** Replaced by the suites unit on 2026-09-08
   (the plugin was skills-only). On a machine that still has it:

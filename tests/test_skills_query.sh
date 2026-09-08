@@ -29,9 +29,10 @@ assert_fail "lock_has unknown" skills_lock_has gamma
 # agents
 assert_eq "$HOME/.codex/skills" "$(skills_agent_dir codex)" "codex dir"
 assert_ok "star agents always ready" skills_agents_ready "*"
-assert_ok "codex ready when dir exists" skills_agents_ready codex
-rm -rf "$HOME/.codex/skills"
-assert_fail "codex not ready when dir missing" skills_agents_ready codex
+assert_eq "$HOME/.codex" "$(skills_agent_home codex)" "codex home"
+assert_ok "codex ready when installed" skills_agents_ready codex
+rm -rf "$HOME/.codex"
+assert_fail "codex not ready when not installed" skills_agents_ready codex
 
 # roster helpers
 R="a/one|*|x y

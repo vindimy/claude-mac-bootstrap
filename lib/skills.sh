@@ -181,12 +181,23 @@ skills_agent_dir() {
   esac
 }
 
-# 0 when agents is "*" or every named agent's skills dir exists.
+# The agent's home dir — proof the agent is installed. (Codex reads the shared
+# store ~/.agents/skills directly; the CLI creates no links under
+# ~/.codex/skills, so that dir is not a usable readiness signal.)
+skills_agent_home() {
+  case "$1" in
+    codex) printf '%s/.codex\n' "$HOME" ;;
+    claude | claude-code) printf '%s/.claude\n' "$HOME" ;;
+    *) printf '%s/.%s\n' "$HOME" "$1" ;;
+  esac
+}
+
+# 0 when agents is "*" or every named agent is installed (its home dir exists).
 skills_agents_ready() {
   local a
   if [ "$1" = "*" ]; then return 0; fi
   for a in $1; do
-    if [ ! -d "$(skills_agent_dir "$a")" ]; then return 1; fi
+    if [ ! -d "$(skills_agent_home "$a")" ]; then return 1; fi
   done
 }
 

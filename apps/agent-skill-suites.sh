@@ -6,9 +6,10 @@
 # (see lib/skills.sh); the split exists so the two sets can be selected
 # independently.
 #
-# superpowers is linked into Codex only: Claude Code gets it from the
-# superpowers plugin (apps/claude-plugins.sh), whose SessionStart hook is
-# what makes it fire automatically; a second copy under ~/.claude/skills
+# superpowers is installed for Codex only (-a codex; Codex reads the shared
+# store directly, so no links are made anywhere): Claude Code gets it from
+# the superpowers plugin (apps/claude-plugins.sh), whose SessionStart hook
+# is what makes it fire automatically; a second copy under ~/.claude/skills
 # would list every skill twice. mattpocock/skills replaced its plugin
 # entirely (the plugin was skills-only, no hooks). "*" tracks the whole
 # repo, so upstream additions and removals follow on the next update.

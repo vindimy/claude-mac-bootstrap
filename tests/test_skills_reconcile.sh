@@ -36,7 +36,7 @@ assert_fail "not linked into claude" test -e "$HOME/.claude/skills/one"
 
 # missing agent dir -> skipped, exit 0, nothing run
 : >"$FAKE_NPX_LOG"
-rm -rf "$HOME/.codex/skills"
+rm -rf "$HOME/.codex"
 assert_ok "skip is not a failure" skills_reconcile acme/suite "codex" "two"
 assert_eq "" "$(npx_log)" "nothing invoked when agent dir missing"
 mkdir -p "$HOME/.codex/skills"
