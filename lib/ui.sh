@@ -5,7 +5,7 @@
 # Display order for category headers in the checklist. Categories used by an
 # app but absent here (including the "Other" fallback) are appended at the end
 # in discovery order.
-CATEGORY_ORDER=("AI" "Browsers" "Development" "Creative" "Cloud Storage" "System Tools" "VPN" "Messaging")
+CATEGORY_ORDER=("AI" "Browsers" "Development" "Creative" "Media" "Cloud Storage" "System Tools" "VPN" "Messaging")
 
 category_in_order() {
   local c

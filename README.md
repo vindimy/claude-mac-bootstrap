@@ -90,11 +90,13 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `amneziavpn` | Amnezia VPN | brew cask `amneziavpn` (pkg installer; prompts for admin password) |
 | `whatsapp` | WhatsApp | brew cask `whatsapp` (self-updates) |
 | `telegram` | Telegram Desktop | brew cask `telegram-desktop` (self-updates); not the `telegram` cask (native Swift build) — see [docs/howto.md](docs/howto.md#telegram) |
+| `vlc` | VLC media player | brew cask `vlc` (self-updates) |
+| `handbrake` | HandBrake (video transcoder) | brew cask `handbrake-app` (self-updates); not the `handbrake` formula (HandBrakeCLI) |
 | `hardening` | macOS Hardening (settings, not an app) | `socketfilterfw`, `defaults`, `/etc/pam.d/sudo_local` via sudo: app firewall + stealth, guest/auto-login off, automatic security updates on (macOS upgrades stay manual), show all extensions, Touch ID for sudo; reports FileVault/SIP/Gatekeeper/SSH-password-auth; re-applied on every update; `zap` restores defaults |
 | `performance` | macOS Performance Tuning (settings, not an app) | `pmset`, `mdutil`, `launchctl`, `defaults` via sudo: never sleep on AC, disks never sleep, Power Nap off, Spotlight off on external volumes, Siri + Apple Intelligence (15+) + Photos analysis + Handoff + crash/analytics reporting off; reports TRIM and manual Spotlight steps; `zap` restores defaults |
 
 The `run.sh` checklist groups apps by category (AI, Browsers, Development,
-Creative, Cloud Storage, System Tools, VPN, Messaging) from each app's `APP_CATEGORY`; the
+Creative, Media, Cloud Storage, System Tools, VPN, Messaging) from each app's `APP_CATEGORY`; the
 numbers stay stable across groupings.
 
 The agent-tooling units (`claude-plugins`, `gsd`, `agent-skills`,
