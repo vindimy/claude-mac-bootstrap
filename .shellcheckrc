@@ -1,0 +1,2 @@
+# Resolve `. "$(dirname "$0")/x.sh"` relative to the script being checked.
+source-path=SCRIPTDIR
