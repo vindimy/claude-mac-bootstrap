@@ -122,6 +122,10 @@ docker context, so existing projects work unchanged:
   by Claude Code via `/model`, `/theme`, `/plugin`, `claude plugin install`)
   is discarded at the next run. The first differing live file is kept once
   as `~/.claude/settings.json.pre-bootstrap.bak`.
+- `~/.claude/statusline-command.sh` is managed the same way (copied from
+  `dotfiles/.claude/statusline-command.sh` whenever it differs). It is what
+  `statusLine.command` in settings.json runs; edit the repo copy to change
+  the status line's fields or colors. It needs `jq`, which macOS ships.
 - The `claude-plugins` unit re-applies the settings after installing
   plugins, because `claude plugin install` marks each plugin enabled and the
   managed profile keeps part of the roster installed-but-disabled.
