@@ -1,95 +1,36 @@
 #!/bin/bash
 # shellcheck disable=SC2034
-# Standalone agent skills — provenance-tracked, upstream-restorable sets
-# installed globally via the skills.sh CLI (npx skills), which links them
-# into all configured agents. Managed as a roster of repo|skill-list records
-# (AGENT_SKILLS_SETS below): to manage more skills, extend a record's list
-# or add a new "owner/repo|name name ..." line — nothing else to register.
+# Curated task-pack skills — installed globally via the skills.sh CLI (npx
+# skills) into ~/.agents/skills and linked into every configured agent.
+# One roster record per upstream repo: owner/repo|agents|default-skills.
+# The defaults are only the pre-checked state of the per-repo checklist that
+# run.sh shows on first install (and on "Reselect skills?"); the machine's
+# actual selection lives in ~/.mac-bootstrap/skills.conf. Mechanics are in
+# lib/skills.sh — this file is data.
 #
-# DELIBERATELY NOT MANAGED (cannot be rebuilt from upstream; live only in the
-# local ~/.agents/skills store): the 20 mattpocock skills (upstream culled
-# them — a bulk `skills update` would sync the deletions and destroy the only
-# surviving copies), the 19 awesome-claude-skills copies, and graphify.
-# Never run a bare `npx skills update` here — updates are selective by name.
-#
-# Roster sources: softaworks + composio from the 2026-08-27 audit in
-# claude-nyamaste-studios-strategy/tech/skills.md; marketing (coreyhaines31),
-# personal-finance/decision (lyndonkl), and business-ops (alirezarezvani)
-# subsets curated 2026-08-30 — each repo carries hundreds more skills, listed
-# via `npx skills add <owner/repo> -l`; keep installs selective to avoid
-# skill-list bloat in every agent session.
-APP_NAME="Agent skills (provenance-tracked)"
+# Defaults: softaworks + composio from the 2026-08-27 audit; marketing
+# (coreyhaines31), personal-finance/decision (lyndonkl) and business-ops
+# (alirezarezvani) subsets curated 2026-08-30; awesome-claude-skills
+# (ComposioHQ) = the 19 skills that used to be hand-copied, with
+# youtube-downloader for the renamed video-downloader (2026-09-08). The rest
+# of that repo is Anthropic's example skills, already installed by the
+# example-skills plugin. Each repo carries more — see them in the checklist.
+AGENT_SKILLS_UNIT="Agent skills (curated task packs)"
+APP_NAME="$AGENT_SKILLS_UNIT"
 APP_CATEGORY="AI"
-APP_NOTE="Local-only skills (mattpocock set, awesome-claude-skills copies, graphify) are not managed here — sync those manually."
 
-# One record per line: owner/repo|space-separated skill names.
-# The FIRST skill of each record doubles as that repo's installed-sentinel.
-AGENT_SKILLS_SETS="softaworks/agent-toolkit|agent-md-refactor backend-to-frontend-handoff-docs c4-architecture codex command-creator commit-work crafting-effective-readmes database-schema-designer dependency-updater design-system-starter difficult-workplace-conversations draw-io feedback-mastery frontend-to-backend-requirements game-changing-features gemini gepetto lesson-learned mui naming-analyzer perplexity plugin-forge professional-communication qa-test-planner reducing-entropy requirements-clarity session-handoff ship-learn-next skill-judge writing-clearly-and-concisely
-composiohq/skills|composio
-coreyhaines31/marketingskills|seo-audit ai-seo schema cro analytics ab-testing copywriting content-strategy customer-research pricing
-lyndonkl/claude|household-finance-dashboard-builder pdf-statement-parser transaction-categorizer recurring-charge-detector cash-flow-forecaster decision-matrix forecast-premortem expected-value scout-mindset-bias-check focus-timeboxing-8020
-alirezarezvani/claude-skills|founder-coach cfo-advisor contract-and-proposal-writer local-seo-manager competitive-intel market-research"
+AGENT_SKILLS_ROSTER="softaworks/agent-toolkit|*|agent-md-refactor backend-to-frontend-handoff-docs c4-architecture codex command-creator commit-work crafting-effective-readmes database-schema-designer dependency-updater design-system-starter difficult-workplace-conversations draw-io feedback-mastery frontend-to-backend-requirements game-changing-features gemini gepetto lesson-learned mui naming-analyzer perplexity plugin-forge professional-communication qa-test-planner reducing-entropy requirements-clarity session-handoff ship-learn-next skill-judge writing-clearly-and-concisely
+composiohq/skills|*|composio
+coreyhaines31/marketingskills|*|seo-audit ai-seo schema cro analytics ab-testing copywriting content-strategy customer-research pricing
+lyndonkl/claude|*|household-finance-dashboard-builder pdf-statement-parser transaction-categorizer recurring-charge-detector cash-flow-forecaster decision-matrix forecast-premortem expected-value scout-mindset-bias-check focus-timeboxing-8020
+alirezarezvani/claude-skills|*|founder-coach cfo-advisor contract-and-proposal-writer local-seo-manager competitive-intel market-research
+ComposioHQ/awesome-claude-skills|*|changelog-generator competitive-ads-extractor connect connect-apps content-research-writer developer-growth-analysis domain-name-brainstormer file-organizer image-enhancer invoice-organizer langsmith-fetch lead-research-assistant meeting-insights-analyzer raffle-winner-picker skill-share tailored-resume-generator template-skill twitter-algorithm-optimizer youtube-downloader"
 
-agent_skills_require_npm() {
-  if ! command -v npx >/dev/null 2>&1; then
-    log "npx not found — installing Node.js first"
-    formula_install node
-  fi
-  if ! command -v npx >/dev/null 2>&1 && [ "$DRY_RUN" != 1 ]; then
-    err "npx still not available — install Node.js and retry"
-    return 1
-  fi
-}
+# Untracked hand-copied leftovers to delete (only when the lock does not
+# track the name): the pre-rename awesome-claude-skills copy.
+AGENT_SKILLS_PURGE="video-downloader"
 
-# All roster skill names as one space-separated list.
-agent_skills_all_names() {
-  local repo skills
-  while IFS='|' read -r repo skills; do
-    if [ -n "$repo" ]; then printf '%s ' "$skills"; fi
-  done <<<"$AGENT_SKILLS_SETS"
-}
-
-agent_skills_install() {
-  local repo skills rc=0
-  if ! agent_skills_require_npm; then return 1; fi
-  while IFS='|' read -r repo skills; do
-    if [ -z "$repo" ]; then continue; fi
-    # -s takes space-separated names; a comma-joined list is treated as one
-    # (nonexistent) skill name and matches nothing.
-    # shellcheck disable=SC2086
-    if ! run_cmd npx -y skills add "$repo" -g -y -s $skills; then
-      err "agent-skills: install from $repo failed"
-      rc=1
-    fi
-  done <<<"$AGENT_SKILLS_SETS"
-  return "$rc"
-}
-
-# Selective update by name — NEVER a bare `skills update` (see header).
-agent_skills_update() {
-  if ! agent_skills_require_npm; then return 1; fi
-  if ! agent_skills_installed && [ "$DRY_RUN" != 1 ]; then
-    agent_skills_install
-    return
-  fi
-  # shellcheck disable=SC2046
-  run_cmd npx -y skills update -g -y $(agent_skills_all_names)
-}
-
-# Removes only the roster names; local-only skills are never touched.
-# $1 (keep|zap) is ignored: skills have no separate settings to zap.
-agent_skills_uninstall() {
-  if ! agent_skills_require_npm; then return 1; fi
-  # shellcheck disable=SC2046
-  run_cmd npx -y skills remove -g -y $(agent_skills_all_names)
-}
-
-# Installed when every record's sentinel (its first skill) is present.
-agent_skills_installed() {
-  local repo skills first
-  while IFS='|' read -r repo skills; do
-    if [ -z "$repo" ]; then continue; fi
-    first="${skills%% *}"
-    if [ ! -d "$HOME/.claude/skills/$first" ]; then return 1; fi
-  done <<<"$AGENT_SKILLS_SETS"
-}
+agent_skills_install()   { skills_unit_install   "$AGENT_SKILLS_UNIT" "$AGENT_SKILLS_ROSTER" "$AGENT_SKILLS_PURGE"; }
+agent_skills_update()    { skills_unit_update    "$AGENT_SKILLS_UNIT" "$AGENT_SKILLS_ROSTER" "$AGENT_SKILLS_PURGE"; }
+agent_skills_uninstall() { skills_unit_uninstall "$AGENT_SKILLS_UNIT" "$AGENT_SKILLS_ROSTER" "$1"; }
+agent_skills_installed() { skills_unit_installed "$AGENT_SKILLS_UNIT" "$AGENT_SKILLS_ROSTER"; }
