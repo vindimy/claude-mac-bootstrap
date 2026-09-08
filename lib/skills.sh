@@ -196,3 +196,69 @@ skills_agents_ready() {
 skills_roster_count() { printf '%s\n' "$1" | grep -c '|'; }
 skills_roster_record() { printf '%s\n' "$1" | grep '|' | sed -n "${2}p"; }
 skills_roster_field() { printf '%s\n' "$1" | cut -d'|' -f"$2"; }
+
+# ---- reconcile ---------------------------------------------------------------
+
+# skills_reconcile repo agents selected
+#   selected: space-separated names, "*" (track the whole repo), or "".
+# add refreshes installed skills in place (verified 2026-09-08), so this is
+# both install and update. Stale = lock names for this repo that are not
+# selected (or, for "*", not published upstream any more) — removed by name.
+skills_reconcile() {
+  local repo="$1" agents="$2" selected="$3" rc=0 name stale="" lock upstream
+  local aflag=() # bash 3.2: guard the expansion below
+  if ! skills_agents_ready "$agents"; then
+    log "$repo: skipped — agent dir missing for '$agents' (installed on a later update once the agent exists)"
+    return 0
+  fi
+  if [ "$agents" != "*" ]; then aflag=(-a "$(printf '%s' "$agents" | tr ' ' ',')"); fi
+  if [ "$selected" = "*" ]; then
+    if ! run_cmd npx -y skills add "$repo" -g -y ${aflag[@]+"${aflag[@]}"} -s '*'; then
+      err "$repo: skills add failed"
+      rc=1
+    fi
+  elif [ -n "$selected" ]; then
+    # shellcheck disable=SC2086
+    if ! run_cmd npx -y skills add "$repo" -g -y ${aflag[@]+"${aflag[@]}"} -s $selected; then
+      err "$repo: skills add failed"
+      rc=1
+    fi
+  fi
+  lock="$(skills_lock_names "$repo" | tr '\n' ' ')"
+  if [ "$selected" = "*" ]; then
+    if upstream="$(skills_upstream_names "$repo")"; then
+      for name in $lock; do
+        if ! in_list "$name" "$upstream"; then stale="$stale $name"; fi
+      done
+    else
+      log "$repo: cannot list upstream — skipping removal of skills upstream dropped"
+    fi
+  else
+    for name in $lock; do
+      if ! in_list "$name" "$selected"; then stale="$stale $name"; fi
+    done
+  fi
+  if [ -n "$stale" ]; then
+    # shellcheck disable=SC2086
+    run_cmd npx -y skills remove -g -y $stale || rc=1
+  fi
+  return "$rc"
+}
+
+# ---- purge -------------------------------------------------------------------
+
+# Delete known untracked leftovers (hand-copied skills with no lock entry)
+# from the store and the agent link dirs. A name the lock tracks is never
+# touched, whatever its source.
+skills_purge_untracked() {
+  local name d
+  for name in $1; do
+    if skills_lock_has "$name"; then continue; fi
+    for d in "$SKILLS_STORE/$name" "$HOME/.claude/skills/$name" "$HOME/.codex/skills/$name"; do
+      if [ -e "$d" ] || [ -L "$d" ]; then
+        log "removing untracked local skill copy: $d"
+        run_cmd rm -rf "$d"
+      fi
+    done
+  done
+}
