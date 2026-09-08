@@ -67,6 +67,29 @@ cask_uninstall() {
   fi
 }
 
+# ---- Rosetta 2 ---------------------------------------------------------------
+
+# Some vendors ship Intel-only pkgs (Amnezia VPN's cask is an x64 pkg), whose
+# installer refuses outright on Apple silicon without Rosetta 2:
+# "This package requires Rosetta 2 to be installed." Call before such
+# installs. No-op on Intel Macs and when Rosetta already runs x86_64 code.
+# --agree-to-license skips softwareupdate's interactive license prompt; sudo
+# may ask for the admin password.
+rosetta_installed() {
+  [ "$(uname -m)" != arm64 ] || /usr/bin/arch -x86_64 /usr/bin/true 2>/dev/null
+}
+
+ensure_rosetta() {
+  if rosetta_installed; then
+    return 0
+  fi
+  log "$1 ships an Intel-only installer — installing Rosetta 2 first (admin password may be asked)"
+  if ! run_cmd sudo softwareupdate --install-rosetta --agree-to-license; then
+    err "$1: Rosetta 2 install failed; run 'sudo softwareupdate --install-rosetta' and re-run"
+    return 1
+  fi
+}
+
 # ---- Homebrew formula -------------------------------------------------------
 
 formula_installed() { brew list --formula "$1" >/dev/null 2>&1; }

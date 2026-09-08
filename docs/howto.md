@@ -22,6 +22,7 @@ per app (apps with nothing beyond "it installs" are omitted).
 - [hardening](#hardening)
 - [performance](#performance)
 - [telegram](#telegram)
+- [amneziavpn](#amneziavpn)
 
 ## General: running the bootstrap
 
@@ -303,3 +304,12 @@ agents and Siri, and deletes the remaining managed keys.
   up with two copies. After the first managed install, quit the old one and
   remove it (and any stray `/Applications/Telegram.localized` folder). Chats
   and login carry over — they live in `~/Library/Application Support/Telegram Desktop`.
+
+## amneziavpn
+
+- The Homebrew cask is an Intel-only pkg. On Apple silicon the installer
+  refuses with "This package requires Rosetta 2 to be installed", so the unit
+  installs Rosetta 2 first via `sudo softwareupdate --install-rosetta`
+  (a second admin-password prompt, before the pkg's own).
+- If that step fails, install Rosetta by hand with the same command and
+  re-run `./run.sh`.
