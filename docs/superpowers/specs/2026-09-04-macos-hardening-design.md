@@ -131,7 +131,7 @@ a setting therefore never fails on an already-clean machine.
 
 | Setting | Command |
 |---|---|
-| Application firewall ON + stealth + logging | `sudo socketfilterfw --setglobalstate on --setstealthmode on --setloggingmode on` |
+| Application firewall ON + stealth | `sudo socketfilterfw --setglobalstate on --setstealthmode on` (logging mode is not managed: macOS 15+ removed `--setloggingmode` from `socketfilterfw`) |
 | Guest login and SMB guest access off | `GuestEnabled false` in `/Library/Preferences/com.apple.loginwindow`; `AllowGuestAccess false` in `/Library/Preferences/SystemConfiguration/com.apple.smb.server` |
 | Automatic login disabled | `defaults delete .../com.apple.loginwindow autoLoginUser` (if present) |
 | Automatic security updates on, macOS upgrades manual | `AutomaticCheckEnabled`, `AutomaticDownload`, `CriticalUpdateInstall` (security responses / security fixes), `ConfigDataInstall` (system data files) true and `AutomaticallyInstallMacOSUpdates` **false** in `/Library/Preferences/com.apple.SoftwareUpdate`; `AutoUpdate true` in `/Library/Preferences/com.apple.commerce` (App Store apps, not the OS). Corrected 2026-09-05 from "all updates on": OS installs reboot the machine and can break dev toolchains, so they stay a manual decision. |
@@ -153,7 +153,7 @@ workflows — and Remote Login off (see Decisions).
 
 ### Revert (`zap`)
 
-Firewall off/stealth off/logging off; the managed `defaults` keys are deleted
+Firewall off/stealth off; the managed `defaults` keys are deleted
 so macOS defaults apply again; the `pam_tid.so` line is removed and
 `sudo_local` deleted if nothing but comments remain. Auto-login is not
 restored (it was removed, not replaced).

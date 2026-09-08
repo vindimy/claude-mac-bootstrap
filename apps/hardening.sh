@@ -10,9 +10,13 @@
 # docs/superpowers/specs/2026-09-04-macos-hardening-design.md
 APP_NAME="macOS Hardening"
 APP_CATEGORY="System Tools"
-APP_NOTE="Needs your admin password (sudo). Applies: app firewall + stealth + logging, guest login/SMB off, auto-login off, automatic security updates on (macOS upgrades download but are NOT installed automatically), show all filename extensions, Touch ID for sudo. Only reports FileVault, SIP, Gatekeeper and SSH password auth (see docs/howto.md). Remote Login (SSH) is left as you set it."
+APP_NOTE="Needs your admin password (sudo). Applies: app firewall + stealth, guest login/SMB off, auto-login off, automatic security updates on (macOS upgrades download but are NOT installed automatically), show all filename extensions, Touch ID for sudo. Only reports FileVault, SIP, Gatekeeper and SSH password auth (see docs/howto.md). Remote Login (SSH) is left as you set it."
 
 HARDENING_FW=/usr/libexec/ApplicationFirewall/socketfilterfw
+# Firewall logging is not managed: macOS 15+ rewrote the application firewall
+# and socketfilterfw no longer accepts --setloggingmode/--getloggingmode (it
+# prints usage and exits 255, which failed this unit on macOS 26). Firewall
+# events go to the unified log without a toggle.
 HARDENING_LOGINWINDOW=/Library/Preferences/com.apple.loginwindow
 HARDENING_SMB=/Library/Preferences/SystemConfiguration/com.apple.smb.server
 HARDENING_SWUPDATE=/Library/Preferences/com.apple.SoftwareUpdate
@@ -105,7 +109,7 @@ hardening_report_ssh() {
 hardening_install() {
   local k
   log "hardening: applying Tier 1 settings (admin password may be asked)"
-  run_cmd sudo "$HARDENING_FW" --setglobalstate on --setstealthmode on --setloggingmode on || return 1
+  run_cmd sudo "$HARDENING_FW" --setglobalstate on --setstealthmode on || return 1
   run_cmd sudo defaults write "$HARDENING_LOGINWINDOW" GuestEnabled -bool false || return 1
   run_cmd sudo defaults write "$HARDENING_SMB" AllowGuestAccess -bool false || return 1
   if defaults read "$HARDENING_LOGINWINDOW" autoLoginUser >/dev/null 2>&1; then
@@ -132,8 +136,8 @@ hardening_update() { hardening_install; }
 hardening_installed() {
   local k
   case "$("$HARDENING_FW" --getglobalstate 2>/dev/null)" in *"State = 1"* | *"State = 2"*) ;; *) return 1 ;; esac
-  case "$("$HARDENING_FW" --getstealthmode 2>/dev/null)" in *enabled*) ;; *) return 1 ;; esac
-  case "$("$HARDENING_FW" --getloggingmode 2>/dev/null)" in *on*) ;; *) return 1 ;; esac
+  # pre-15: "Stealth mode enabled"; 15+: "Firewall stealth mode is on"
+  case "$("$HARDENING_FW" --getstealthmode 2>/dev/null)" in *enabled* | *"is on"*) ;; *) return 1 ;; esac
   pref_is "$HARDENING_LOGINWINDOW" GuestEnabled 0 || return 1
   pref_is "$HARDENING_SMB" AllowGuestAccess 0 || return 1
   if defaults read "$HARDENING_LOGINWINDOW" autoLoginUser >/dev/null 2>&1; then return 1; fi
@@ -156,7 +160,7 @@ hardening_uninstall() {
     log "hardening: settings kept (choose zap to restore macOS defaults)"
     return 0
   fi
-  run_cmd sudo "$HARDENING_FW" --setglobalstate off --setstealthmode off --setloggingmode off
+  run_cmd sudo "$HARDENING_FW" --setglobalstate off --setstealthmode off
   pref_delete sudo "$HARDENING_LOGINWINDOW" GuestEnabled
   pref_delete sudo "$HARDENING_SMB" AllowGuestAccess
   for k in $HARDENING_SWUPDATE_KEYS $HARDENING_SWUPDATE_OS_KEY; do

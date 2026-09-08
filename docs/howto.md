@@ -190,7 +190,7 @@ A settings unit, not an app: selecting it applies a security baseline, every
 restores macOS defaults. Every run asks for your admin password once.
 Design and rationale: `docs/superpowers/specs/2026-09-04-macos-hardening-design.md`.
 
-**What it changes:** application firewall on with stealth mode and logging;
+**What it changes:** application firewall on with stealth mode;
 guest login and SMB guest access off; automatic login removed; automatic
 updates set to security-only — check, download, security responses and system
 data files on, App Store app updates on, but **macOS updates are not installed
@@ -225,7 +225,7 @@ Touch ID the line is harmless — sudo falls through to the password prompt.
 **Verify after applying:**
 
 ```sh
-/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate --getstealthmode --getloggingmode
+/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate --getstealthmode
 defaults read /Library/Preferences/com.apple.loginwindow GuestEnabled          # 0
 defaults read /Library/Preferences/com.apple.SoftwareUpdate CriticalUpdateInstall              # 1
 defaults read /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates  # 0
