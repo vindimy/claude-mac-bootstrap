@@ -102,6 +102,24 @@ select_apps() {
   done
 }
 
+# Width of the terminal the UI draws on. Rows go to stderr while stdout is
+# captured by the caller, so `tput cols` (which measures stdout) would fall
+# back to terminfo's 80 columns and clip every description. Measure the
+# stderr fd instead, then the controlling tty, then $COLUMNS, then 120.
+term_width() {
+  local w
+  # Redirect order matters: dup the tty onto stdin before silencing stderr.
+  w="$(stty size <&2 2>/dev/null | awk '{print $2}')"
+  if [ -z "$w" ] || [ "$w" -eq 0 ]; then
+    w="$(stty size 2>/dev/null </dev/tty | awk '{print $2}')"
+  fi
+  if [ -z "$w" ] || [ "$w" -eq 0 ]; then w="${COLUMNS:-}"; fi
+  case "$w" in
+    '' | *[!0-9]* | 0) w=120 ;;
+  esac
+  printf '%s\n' "$w"
+}
+
 # select_from_list title items current new_names -> prints the selection.
 # items: newline-separated "name<TAB>description"; current: space-separated
 # names or "*" (= all); new_names: names to tag "(new)". Rows and prompts go
@@ -110,11 +128,14 @@ select_apps() {
 # the checked names in item order — possibly nothing. EOF on stdin confirms.
 select_from_list() {
   local title="$1" items="$2" current="$3" new_names="$4"
-  local names total width n name desc mark tag input tok picked count
+  local names total width namew n name desc mark tag input tok picked count
   names="$(printf '%s\n' "$items" | cut -f1 | grep . || true)"
   total="$(printf '%s\n' "$names" | grep -c . || true)"
   if [ "$current" = "*" ]; then current="$(printf '%s\n' "$names" | tr '\n' ' ')"; fi
-  width="$(tput cols 2>/dev/null || echo 120)"
+  width="$(term_width)"
+  # Name column is as wide as the longest name (not a fixed 30) and the (new)
+  # tag has a fixed slot, so descriptions line up and get the remaining width.
+  namew="$(printf '%s\n' "$names" | awk '{ if (length($0) > m) m = length($0) } END { print m + 0 }')"
   while :; do
     printf '\n%s\n' "$title" >&2
     n=0
@@ -124,8 +145,8 @@ select_from_list() {
       mark=" "
       if in_list "$name" "$current"; then mark=x; fi
       tag=""
-      if in_list "$name" "$new_names"; then tag=" (new)"; fi
-      printf '  %3d) [%s] %-30s%s  %s\n' "$n" "$mark" "$name" "$tag" "$desc" | cut -c1-"$width" >&2
+      if in_list "$name" "$new_names"; then tag="(new)"; fi
+      printf '  %3d) [%s] %-*s  %-5s %s\n' "$n" "$mark" "$namew" "$name" "$tag" "$desc" | cut -c1-"$width" >&2
     done <<<"$items"
     count=0
     for name in $names; do
