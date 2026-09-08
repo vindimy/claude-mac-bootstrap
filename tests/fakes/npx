@@ -4,7 +4,7 @@
 # sandbox HOME:
 #   add <repo> -l                  print a CLI-style listing from
 #                                  $FAKE_NPX_FIXTURES/repo-<owner_repo>.txt
-#   add <repo> -g -y [-a A] -s N.. create $HOME/.agents/skills/N/SKILL.md,
+#   add <repo> -g -y [-a A..] -s N.. create $HOME/.agents/skills/N/SKILL.md,
 #                                  link into agent dirs, record lock entries
 #   remove -g -y N..               delete store dirs, links, lock entries
 # FAKE_NPX_FAIL=1 makes add/remove exit 1; FAKE_NPX_LIST_FAIL=1 makes -l exit 1.
@@ -52,11 +52,11 @@ case "$cmd" in
       case "$a" in
         -l) list=1 ;;
         -g | -y) ;;
-        -a) mode=a ;;
+        -a) mode=a; agents="" ;;
         -s) mode=s ;;
         *)
           case "$mode" in
-            a) agents="$(printf '%s' "$a" | tr ',' ' ')" ;;
+            a) agents="$agents $a" ;;
             s) names="$names $a" ;;
           esac
           ;;

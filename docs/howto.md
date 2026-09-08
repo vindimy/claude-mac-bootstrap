@@ -170,7 +170,15 @@ docker context, so existing projects work unchanged:
 - Removing a unit removes only the skills the lock file attributes to its
   repos; `zap` also forgets its `skills.conf` lines. Skills from other
   sources are never touched, and the units never run a bare `skills update`.
-- The CLI takes space-separated names after `-s`, not a comma list.
+- The CLI takes space-separated names after `-s` and `-a`, not a comma list.
+- A roster agents field of `*` is resolved to the installed agents the units
+  know (`claude-code`, `codex`; see `SKILLS_KNOWN_AGENTS` in `lib/skills.sh`)
+  and passed as an explicit `-a`. Letting the CLI pick agents itself
+  (`add -g -y` with no `-a`) adds every `.agents/skills` agent including
+  PromptScript, which has no global dir, so each run ended with a red
+  "Failed to install N ... PromptScript does not support global skill
+  installation" block. Harmless (exit 0, skills installed), but noise —
+  upstream bug vercel-labs/skills#1424, open since 2026-06.
 
 ## gsd
 

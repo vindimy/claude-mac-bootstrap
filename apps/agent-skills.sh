@@ -3,6 +3,8 @@
 # Curated task-pack skills — installed globally via the skills.sh CLI (npx
 # skills) into ~/.agents/skills and linked into every configured agent.
 # One roster record per upstream repo: owner/repo|agents|default-skills.
+# agents "*" = every agent lib/skills.sh knows that is installed on this
+# machine (SKILLS_KNOWN_AGENTS), passed explicitly as -a.
 # The defaults are only the pre-checked state of the per-repo checklist that
 # run.sh shows on first install (and on "Reselect skills?"); the machine's
 # actual selection lives in ~/.mac-bootstrap/skills.conf. Mechanics are in

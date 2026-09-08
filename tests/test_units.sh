@@ -45,5 +45,5 @@ unset SKILLS_SYNCED_UNITS
 rm -f "$(skills_conf_file)"
 out="$(DRY_RUN=1 agent_skill_suites_install 2>/dev/null)"
 assert_contains "$out" "[dry-run] npx -y skills add obra/superpowers -g -y -a codex -s *" "superpowers dry-run add"
-assert_contains "$out" "[dry-run] npx -y skills add NeoLabHQ/context-engineering-kit -g -y -s context-engineering" "cek dry-run add"
+assert_contains "$out" "[dry-run] npx -y skills add NeoLabHQ/context-engineering-kit -g -y -a claude-code codex -s context-engineering" "cek dry-run add"
 finish

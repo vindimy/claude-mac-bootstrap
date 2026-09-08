@@ -192,6 +192,21 @@ skills_agent_home() {
   esac
 }
 
+# Agents a "*" roster entry resolves to: every known agent whose home dir
+# exists, in this order. Passed explicitly as -a because the CLI's own
+# auto-selection (add -g -y with no -a) appends every ".agents/skills" agent,
+# including ones with no global dir, and reports them as failures
+# (vercel-labs/skills#1424, open since 2026-06).
+SKILLS_KNOWN_AGENTS="claude-code codex"
+
+skills_installed_agents() {
+  local a out=""
+  for a in $SKILLS_KNOWN_AGENTS; do
+    if [ -d "$(skills_agent_home "$a")" ]; then out="$out $a"; fi
+  done
+  printf '%s\n' "${out# }"
+}
+
 # 0 when agents is "*" or every named agent is installed (its home dir exists).
 skills_agents_ready() {
   local a
@@ -222,7 +237,10 @@ skills_reconcile() {
     log "$repo: skipped — agent dir missing for '$agents' (installed on a later update once the agent exists)"
     return 0
   fi
-  if [ "$agents" != "*" ]; then aflag=(-a "$(printf '%s' "$agents" | tr ' ' ',')"); fi
+  if [ "$agents" = "*" ]; then agents="$(skills_installed_agents)"; fi
+  # -a is variadic like -s: space-separated names (a comma list is rejected)
+  # shellcheck disable=SC2206
+  if [ -n "$agents" ]; then aflag=(-a $agents); fi
   if [ "$selected" = "*" ]; then
     if ! run_cmd npx -y skills add "$repo" -g -y ${aflag[@]+"${aflag[@]}"} -s '*'; then
       err "$repo: skills add failed"
