@@ -10,3 +10,9 @@ local/
 dotfiles/.claude/*
 !dotfiles/.claude/settings.json
 !dotfiles/.claude/statusline-command.sh
+
+# Finder metadata, anywhere in the tree.
+.DS_Store
+
+# Claude Code per-machine permission overrides for this repo.
+.claude/settings.local.json
