@@ -17,6 +17,9 @@
 
 SKILLS_STORE="${SKILLS_STORE:-$HOME/.agents/skills}"
 SKILLS_LOCK="${SKILLS_LOCK:-$HOME/.agents/.skill-lock.json}"
+# Per-process cache of upstream listings. Keyed by $$ (the entry point's PID,
+# which command substitutions inherit) so a subshell's fetch is reused.
+SKILLS_CACHE_DIR="${SKILLS_CACHE_DIR:-${TMPDIR:-/tmp}/mac-bootstrap-skills.$$}"
 
 # ---- saved selection: $CONFIG_DIR/skills.conf --------------------------------
 # Shell-sourced like apps.conf; one SKILLS_<repo> line per repo. "*" means
@@ -69,3 +72,127 @@ skills_conf_delete() { # repo
   fi
   if [ -f "$(skills_conf_file)" ]; then skills_conf_write "$(skills_var_name "$1")" "" delete; fi
 }
+
+# ---- npx ---------------------------------------------------------------------
+
+skills_require_npx() {
+  if ! command -v npx >/dev/null 2>&1; then
+    log "npx not found — installing Node.js first"
+    formula_install node
+  fi
+  if ! command -v npx >/dev/null 2>&1 && [ "$DRY_RUN" != 1 ]; then
+    err "npx still not available — install Node.js and retry"
+    return 1
+  fi
+}
+
+# ---- upstream listing --------------------------------------------------------
+
+# stdin: raw `skills add <repo> -l` output -> stdout: "name<TAB>description"
+# per skill (description = first line under the name, may be empty). The CLI
+# draws a box: names are "│" + 4 spaces + name, descriptions "│" + 6 spaces.
+skills_parse_listing() {
+  python3 -c '
+import re, sys
+ansi = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+name = None
+for raw in sys.stdin:
+    line = ansi.sub("", raw).rstrip("\n")
+    if not line.startswith("│"):
+        continue
+    body = line[1:]
+    m = re.match(r"^    ([A-Za-z0-9][A-Za-z0-9._-]*)$", body)
+    if m:
+        if name:
+            print(name + "\t")
+        name = m.group(1)
+        continue
+    m = re.match(r"^      (\S.*)$", body)
+    if m and name:
+        print(name + "\t" + m.group(1).strip())
+        name = None
+if name:
+    print(name + "\t")
+'
+}
+
+# Prints "name<TAB>description" lines for a repo; exit 1 when the CLI fails
+# or finds nothing. Cached per process (one network round trip per repo).
+skills_list_upstream() {
+  local repo="$1" cache raw
+  mkdir -p "$SKILLS_CACHE_DIR"
+  cache="$SKILLS_CACHE_DIR/$(printf '%s' "$repo" | tr '/' '_')"
+  if [ -f "$cache" ]; then cat "$cache"; return 0; fi
+  if ! raw="$(npx -y skills add "$repo" -l 2>&1)"; then return 1; fi
+  printf '%s\n' "$raw" | skills_parse_listing >"$cache.tmp"
+  if ! grep -q . "$cache.tmp"; then rm -f "$cache.tmp"; return 1; fi
+  mv "$cache.tmp" "$cache"
+  cat "$cache"
+}
+
+skills_upstream_names() { # repo -> "a b c"
+  local items
+  items="$(skills_list_upstream "$1")" || return 1
+  printf '%s\n' "$items" | cut -f1 | tr '\n' ' ' | sed 's/ $//'
+  printf '\n'
+}
+
+# ---- lock file ---------------------------------------------------------------
+# ~/.agents/.skill-lock.json: {"skills": {name: {"source": "owner/repo", ...}}}
+
+skills_lock_names() { # repo -> one installed name per line
+  if [ ! -f "$SKILLS_LOCK" ]; then return 0; fi
+  if ! command -v python3 >/dev/null 2>&1; then
+    warn "python3 not found — cannot read $SKILLS_LOCK; treating it as empty"
+    return 0
+  fi
+  python3 - "$SKILLS_LOCK" "$1" <<'PY'
+import json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+except Exception as e:  # unreadable lock: warn, act as empty
+    sys.stderr.write("warning: cannot read %s: %s\n" % (sys.argv[1], e))
+    sys.exit(0)
+for n, v in sorted(d.get("skills", {}).items()):
+    if v.get("source") == sys.argv[2]:
+        print(n)
+PY
+}
+
+skills_lock_has() { # name -> 0 if any source tracks it
+  if [ ! -f "$SKILLS_LOCK" ] || ! command -v python3 >/dev/null 2>&1; then return 1; fi
+  python3 - "$SKILLS_LOCK" "$1" <<'PY'
+import json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+except Exception:
+    sys.exit(1)
+sys.exit(0 if sys.argv[2] in d.get("skills", {}) else 1)
+PY
+}
+
+# ---- agents ------------------------------------------------------------------
+
+skills_agent_dir() {
+  case "$1" in
+    codex) printf '%s/.codex/skills\n' "$HOME" ;;
+    claude | claude-code) printf '%s/.claude/skills\n' "$HOME" ;;
+    *) printf '%s/.%s/skills\n' "$HOME" "$1" ;;
+  esac
+}
+
+# 0 when agents is "*" or every named agent's skills dir exists.
+skills_agents_ready() {
+  local a
+  if [ "$1" = "*" ]; then return 0; fi
+  for a in $1; do
+    if [ ! -d "$(skills_agent_dir "$a")" ]; then return 1; fi
+  done
+}
+
+# ---- roster helpers ----------------------------------------------------------
+# Line-numbered access so callers can prompt (read stdin) inside the loop.
+
+skills_roster_count() { printf '%s\n' "$1" | grep -c '|'; }
+skills_roster_record() { printf '%s\n' "$1" | grep '|' | sed -n "${2}p"; }
+skills_roster_field() { printf '%s\n' "$1" | cut -d'|' -f"$2"; }
