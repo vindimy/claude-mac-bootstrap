@@ -30,6 +30,11 @@ per app (apps with nothing beyond "it installs" are omitted).
 - Per-machine app selection lives in `~/.mac-bootstrap/apps.conf` (outside the
   repo, machine-local by design).
 - `DRY_RUN=1 ./run.sh` prints every mutating command instead of running it.
+- If a cask uninstall fails with "It seems there is already an App at
+  '/opt/homebrew/Caskroom/...'", an earlier uninstall was interrupted after
+  Homebrew copied the app back into the Caskroom. `run.sh` offers to retry
+  with `brew uninstall --cask --force`, which overwrites that leftover copy;
+  the retry only runs after you confirm, never under `--non-interactive`.
 - On a fresh machine the Xcode CLT GUI installer window can open **behind**
   the Terminal window — move Terminal if the install seems stalled.
 

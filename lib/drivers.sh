@@ -32,15 +32,38 @@ cask_update() {
   fi
 }
 
+# Homebrew uninstalls a cask by copying the app from /Applications back into
+# the Caskroom, then deleting the Caskroom. An interrupted uninstall leaves the
+# app only in the Caskroom, and every later plain uninstall then fails with
+# "It seems there is already an App at '/opt/homebrew/Caskroom/...'".
+# --force overwrites that leftover copy and removes every staged version, so
+# it is only retried after the user confirms. Non-interactive runs (and
+# update.sh, which has no prompt helper) fail as before. Under --dry-run,
+# run_cmd returns 0, so only the plain uninstall line is printed.
 cask_uninstall() {
-  if ! cask_installed "$1"; then
-    log "$1: not installed via brew, nothing to remove"
+  local name="$1" mode="${2:-keep}"
+  if ! cask_installed "$name"; then
+    log "$name: not installed via brew, nothing to remove"
     return 0
   fi
-  if [ "${2:-keep}" = zap ]; then
-    run_cmd brew uninstall --cask --zap "$1"
+  if [ "$mode" = zap ]; then
+    run_cmd brew uninstall --cask --zap "$name" && return 0
   else
-    run_cmd brew uninstall --cask "$1"
+    run_cmd brew uninstall --cask "$name" && return 0
+  fi
+  if [ "${NON_INTERACTIVE:-1}" = 1 ] || ! command -v prompt_confirm >/dev/null 2>&1; then
+    err "$name: brew uninstall failed; rerun interactively to retry with --force, or run: brew uninstall --cask --force $name"
+    return 1
+  fi
+  warn "$name: brew uninstall failed (usually a leftover copy in the Caskroom from an interrupted uninstall)"
+  if ! prompt_confirm "Retry with --force? This overwrites the leftover Caskroom copy and removes all staged versions of $name"; then
+    err "$name: removal skipped; it stays selected and will be retried next run"
+    return 1
+  fi
+  if [ "$mode" = zap ]; then
+    run_cmd brew uninstall --cask --force --zap "$name"
+  else
+    run_cmd brew uninstall --cask --force "$name"
   fi
 }
 

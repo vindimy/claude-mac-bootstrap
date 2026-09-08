@@ -102,6 +102,18 @@ select_apps() {
   done
 }
 
+# Yes/no confirmation for a risky step. Prompt goes to stderr. Default (Enter
+# or anything but y) = no, so a stray keypress never approves the action.
+prompt_confirm() {
+  local ans
+  printf '%s [y/N]: ' "$1" >&2
+  read -r ans
+  case "$ans" in
+    y | Y | yes | YES) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 # Ask keep-vs-zap for one app being uninstalled. Prompt goes to stderr so the
 # answer can be captured from stdout. Default (Enter or anything but z) = keep.
 prompt_uninstall_mode() {
