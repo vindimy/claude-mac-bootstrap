@@ -11,7 +11,7 @@ per app (apps with nothing beyond "it installs" are omitted).
 - [docker (Docker Desktop)](#docker-docker-desktop)
 - [claude-code](#claude-code)
 - [claude-plugins](#claude-plugins)
-- [agent-skills](#agent-skills)
+- [agent-skills / agent-skill-suites](#agent-skills--agent-skill-suites)
 - [gsd](#gsd)
 - [dropbox](#dropbox)
 - [controld](#controld)
@@ -138,16 +138,37 @@ docker context, so existing projects work unchanged:
 - Restart Claude Code (new session) after installing or updating plugins —
   a running session does not pick them up.
 
-## agent-skills
+## agent-skills / agent-skill-suites
 
-- **Never run a bare `npx skills update`.** Updates must stay selective by
-  name (the unit does this): upstream culled the mattpocock skills, and a
-  bulk update would sync the deletions and destroy the only surviving local
-  copies.
-- Local-only skills (the 20 mattpocock survivors, the 19
-  awesome-claude-skills copies, graphify) live solely in `~/.agents/skills`
-  and are synced manually — the unit never touches them.
-- The skills CLI takes space-separated names after `-s`, not a comma list.
+- Both units install through the skills.sh CLI (`npx -y skills`) into the
+  shared store `~/.agents/skills`, linked into every detected agent
+  (`~/.claude/skills`, `~/.codex/skills`). Node is installed first if `npx`
+  is missing.
+- **Choosing skills.** First install in an interactive `./run.sh` shows a
+  checklist per repo: toggle numbers, `a` = all, `n` = none, Enter confirms.
+  Checking every skill saves `*` ("track all": new upstream skills arrive on
+  the next update, removed ones are cleaned out). Anything else saves an
+  explicit list that only changes when you reselect. Non-interactive first
+  installs take the roster defaults.
+- **Reselecting.** Later interactive `./run.sh` passes ask
+  `Reselect skills for <unit>? [y/N]` once per unit; Enter skips. Skills new
+  upstream since your last explicit selection are tagged `(new)`.
+  `./update.sh` never prompts.
+- **Where it is saved.** `~/.mac-bootstrap/skills.conf`, one `SKILLS_<repo>`
+  line per repo. Editing it by hand and running `./update.sh` is a valid way
+  to change a selection on a headless machine.
+- **superpowers** is linked into Codex only: Claude Code keeps the
+  `superpowers` plugin (its SessionStart hook is what makes it fire), and a
+  store copy under `~/.claude/skills` would list every skill twice. If
+  `~/.codex/skills` does not exist yet, the repo is skipped and installed on
+  the next update.
+- **mattpocock-skills plugin.** Replaced by the suites unit on 2026-09-08
+  (the plugin was skills-only). On a machine that still has it:
+  `claude plugin uninstall mattpocock-skills@claude-plugins-official`.
+- Removing a unit removes only the skills the lock file attributes to its
+  repos; `zap` also forgets its `skills.conf` lines. Skills from other
+  sources are never touched, and the units never run a bare `skills update`.
+- The CLI takes space-separated names after `-s`, not a comma list.
 
 ## gsd
 

@@ -79,9 +79,10 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `xcode` | Xcode (iOS builds) | Mac App Store via brew formula `mas`; needs App Store sign-in, accepts license + first-launch setup (sudo) |
 | `fastlane` | fastlane | brew formula `fastlane`; iOS/Android build + release automation |
 | `android-studio` | Android Studio | brew cask `android-studio` (self-updates); SDK via first-launch wizard, `.zprofile` exports `ANDROID_HOME` when the SDK exists |
-| `claude-plugins` | Claude Code plugins (12 from 9 marketplaces) | `claude plugin` CLI; needs `claude-code` |
+| `claude-plugins` | Claude Code plugins (11 from 9 marketplaces) | `claude plugin` CLI; needs `claude-code` |
 | `gsd` | GSD skill suite (67 `gsd-*` skills) | npm `get-shit-done-cc` (installs Node if needed) |
-| `agent-skills` | Provenance-tracked agent skills (57 from 5 repos: softaworks/agent-toolkit, composio, coreyhaines31/marketingskills, lyndonkl/claude, alirezarezvani/claude-skills) | skills.sh CLI (`npx skills`), selective updates only; roster in `apps/agent-skills.sh` |
+| `agent-skills` | Agent skills, curated task packs (6 repos: softaworks/agent-toolkit, composio, coreyhaines31/marketingskills, lyndonkl/claude, alirezarezvani/claude-skills, ComposioHQ/awesome-claude-skills) | skills.sh CLI (`npx skills`); per-repo checklist on first install, saved in `~/.mac-bootstrap/skills.conf`; roster in `apps/agent-skills.sh` |
+| `agent-skill-suites` | Agent skill suites (obra/superpowers → Codex only, mattpocock/skills, open-gsd/gsd-pi, NeoLabHQ/context-engineering-kit) | skills.sh CLI; same checklist/selection model; `*` selections track upstream additions and removals; roster in `apps/agent-skill-suites.sh` |
 | `codex` | Codex CLI | brew cask `codex` (binary release; brew-updated) |
 | `antigravity` | Google Antigravity | brew cask `antigravity` (self-updates) |
 | `sublime-text` | Sublime Text | brew cask `sublime-text` (self-updates) |
@@ -96,13 +97,19 @@ The `run.sh` checklist groups apps by category (AI, Browsers, Development,
 Creative, Cloud Storage, System Tools, VPN, Messaging) from each app's `APP_CATEGORY`; the
 numbers stay stable across groupings.
 
-The three agent-tooling units mirror the inventory in
-`claude-nyamaste-studios-strategy/tech/skills.md`. `agent-skills` manages only
-the upstream-restorable set and always updates selectively by name — never a
-bare `skills update`, which would sync upstream's deletion of the culled
-mattpocock skills. Local-only skills (the 20 mattpocock survivors, the 19
-awesome-claude-skills copies, graphify) live solely in `~/.agents/skills` and
-are synced manually, not managed here.
+The agent-tooling units (`claude-plugins`, `gsd`, `agent-skills`,
+`agent-skill-suites`) mirror the inventory in
+`claude-nyamaste-studios-strategy/tech/skills.md`. Both skills units are
+rosters over the skills.sh CLI: on first install `run.sh` shows one checklist
+per upstream repo (pre-checked with the roster defaults), saves the choice per
+machine in `~/.mac-bootstrap/skills.conf`, and reconciles the shared store
+`~/.agents/skills` against it — selected skills are (re)installed by name,
+deselected ones removed, using the CLI's own lock file as the record of what
+came from where. Later `run.sh` passes ask once per unit whether to reselect
+(Enter = no); `update.sh` never prompts. Checking every skill of a repo saves
+`*`, which also picks up skills the repo adds later. Nothing in the store is
+hand-copied any more: the old local-only sets were either reinstalled from
+their upstreams or removed (see the 2026-09-08 spec).
 
 Grok has no official macOS app (no cask, no Mac App Store app, no dmg as of
 2026-08-28) and is web-only for now. To add a new app later: drop an
