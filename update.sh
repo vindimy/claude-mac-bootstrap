@@ -17,6 +17,8 @@ fi
 . "$REPO_ROOT/lib/common.sh"
 # shellcheck disable=SC1091
 . "$REPO_ROOT/lib/drivers.sh"
+# shellcheck source=lib/skills.sh
+. "$REPO_ROOT/lib/skills.sh"
 
 usage() {
   cat <<'EOF'

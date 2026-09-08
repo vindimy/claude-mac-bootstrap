@@ -16,6 +16,7 @@ else
 fi
 for t in tests/test_*.sh; do
   [ -e "$t" ] || continue
-  /bin/bash "$t" || rc=1
+  # stdin closed: an unexpected prompt fails fast instead of hanging the run
+  /bin/bash "$t" </dev/null || rc=1
 done
 exit "$rc"

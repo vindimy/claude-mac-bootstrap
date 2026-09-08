@@ -262,3 +262,144 @@ skills_purge_untracked() {
     done
   done
 }
+
+# ---- selection ---------------------------------------------------------------
+
+# Interactive only under run.sh without --non-interactive, and only when
+# lib/ui.sh is loaded (update.sh never sources it).
+skills_interactive() {
+  [ "${NON_INTERACTIVE:-1}" = 0 ] && command -v select_from_list >/dev/null 2>&1
+}
+
+# skills_select_repo unit repo saved has_saved defaults -> prints selection.
+# Lists the repo live; pre-checks the saved selection (or the roster defaults
+# on first install); tags skills new since the saved list. Falls back to the
+# saved selection or the defaults when upstream cannot be listed. stdout is
+# captured — nothing here may call log.
+skills_select_repo() {
+  local unit="$1" repo="$2" saved="$3" has_saved="$4" defaults="$5"
+  local items names pre new="" name total fallback
+  if [ "$has_saved" = 1 ]; then fallback="$saved"; else fallback="$defaults"; fi
+  if ! items="$(skills_list_upstream "$repo")"; then
+    warn "$repo: cannot list upstream skills — keeping [${fallback:-<none>}]"
+    printf '%s\n' "$fallback"
+    return 0
+  fi
+  names="$(printf '%s\n' "$items" | cut -f1 | tr '\n' ' ')"
+  total="$(printf '%s\n' "$items" | grep -c .)"
+  pre="$fallback"
+  if [ "$has_saved" = 1 ] && [ "$saved" != "*" ]; then
+    for name in $names; do
+      if ! in_list "$name" "$saved"; then new="$new $name"; fi
+    done
+    for name in $saved; do
+      if ! in_list "$name" "$names"; then warn "$repo: '$name' is no longer published upstream — dropped from the selection"; fi
+    done
+  fi
+  select_from_list "$unit — $repo ($total upstream)" "$items" "$pre" "$new"
+}
+
+# ---- unit operations ---------------------------------------------------------
+# run.sh calls <id>_install then <id>_update for a newly selected unit; the
+# second pass would re-prompt and re-clone, so a unit synced in this process
+# is remembered in SKILLS_SYNCED_UNITS and skipped.
+
+skills_unit_sync() { # unit roster purge
+  local unit="$1" roster="$2" purge="$3"
+  local n i rec repo agents defaults saved has_saved sel any_saved=0 reselect=0 rc=0
+  if in_list "$unit" "${SKILLS_SYNCED_UNITS:-}"; then return 0; fi
+  skills_require_npx || return 1
+  n="$(skills_roster_count "$roster")"
+  i=1
+  while [ "$i" -le "$n" ]; do
+    repo="$(skills_roster_field "$(skills_roster_record "$roster" "$i")" 1)"
+    if skills_conf_get "$repo" >/dev/null; then any_saved=1; fi
+    i=$((i + 1))
+  done
+  if [ "$any_saved" = 1 ] && skills_interactive && prompt_confirm "Reselect skills for $unit?"; then
+    reselect=1
+  fi
+  if [ -n "$purge" ]; then skills_purge_untracked "$purge"; fi
+  i=1
+  while [ "$i" -le "$n" ]; do
+    rec="$(skills_roster_record "$roster" "$i")"
+    i=$((i + 1))
+    repo="$(skills_roster_field "$rec" 1)"
+    agents="$(skills_roster_field "$rec" 2)"
+    defaults="$(skills_roster_field "$rec" 3)"
+    has_saved=0
+    saved=""
+    if saved="$(skills_conf_get "$repo")"; then has_saved=1; fi
+    sel="$saved"
+    if [ "$has_saved" = 0 ]; then
+      if skills_interactive; then
+        sel="$(skills_select_repo "$unit" "$repo" "" 0 "$defaults")"
+      else
+        sel="$defaults"
+      fi
+      skills_conf_put "$repo" "$sel"
+    elif [ "$reselect" = 1 ]; then
+      sel="$(skills_select_repo "$unit" "$repo" "$saved" 1 "$defaults")"
+      if [ "$sel" != "$saved" ]; then skills_conf_put "$repo" "$sel"; fi
+    fi
+    skills_reconcile "$repo" "$agents" "$sel" || rc=1
+  done
+  SKILLS_SYNCED_UNITS="${SKILLS_SYNCED_UNITS:-} $unit"
+  return "$rc"
+}
+
+skills_unit_install() { skills_unit_sync "$@"; }
+skills_unit_update() { skills_unit_sync "$@"; }
+
+# Removes every skill the lock attributes to the unit's repos — nothing else.
+# keep leaves skills.conf alone; zap drops the unit's lines too.
+skills_unit_uninstall() { # unit roster keep|zap
+  local unit="$1" roster="$2" mode="${3:-keep}" n i repo names=""
+  skills_require_npx || return 1
+  n="$(skills_roster_count "$roster")"
+  i=1
+  while [ "$i" -le "$n" ]; do
+    repo="$(skills_roster_field "$(skills_roster_record "$roster" "$i")" 1)"
+    names="$names $(skills_lock_names "$repo" | tr '\n' ' ')"
+    i=$((i + 1))
+  done
+  # shellcheck disable=SC2086
+  set -- $names
+  if [ "$#" -gt 0 ]; then
+    run_cmd npx -y skills remove -g -y "$@" || return 1
+  else
+    log "$unit: no managed skills installed"
+  fi
+  if [ "$mode" = zap ]; then
+    i=1
+    while [ "$i" -le "$n" ]; do
+      skills_conf_delete "$(skills_roster_field "$(skills_roster_record "$roster" "$i")" 1)"
+      i=$((i + 1))
+    done
+  fi
+}
+
+# Installed = every roster repo has a saved line and its selection is present
+# in the store ("*": at least one lock entry for the repo). A repo whose
+# agent dir is missing counts as satisfied (it is skipped by reconcile too).
+skills_unit_installed() { # unit roster
+  local roster="$2" n i rec repo agents saved name
+  n="$(skills_roster_count "$roster")"
+  i=1
+  while [ "$i" -le "$n" ]; do
+    rec="$(skills_roster_record "$roster" "$i")"
+    i=$((i + 1))
+    repo="$(skills_roster_field "$rec" 1)"
+    agents="$(skills_roster_field "$rec" 2)"
+    saved="$(skills_conf_get "$repo")" || return 1
+    if ! skills_agents_ready "$agents"; then continue; fi
+    if [ "$saved" = "*" ]; then
+      if [ -z "$(skills_lock_names "$repo")" ]; then return 1; fi
+    else
+      for name in $saved; do
+        if [ ! -d "$SKILLS_STORE/$name" ]; then return 1; fi
+      done
+    fi
+  done
+  return 0
+}
