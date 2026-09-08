@@ -102,6 +102,85 @@ select_apps() {
   done
 }
 
+# select_from_list title items current new_names -> prints the selection.
+# items: newline-separated "name<TAB>description"; current: space-separated
+# names or "*" (= all); new_names: names to tag "(new)". Rows and prompts go
+# to stderr so the result can be captured from stdout. Same grammar as the
+# app checklist. Prints "*" when every item is checked (track-all), otherwise
+# the checked names in item order — possibly nothing. EOF on stdin confirms.
+select_from_list() {
+  local title="$1" items="$2" current="$3" new_names="$4"
+  local names total width n name desc mark tag input tok picked count
+  names="$(printf '%s\n' "$items" | cut -f1 | grep . || true)"
+  total="$(printf '%s\n' "$names" | grep -c . || true)"
+  if [ "$current" = "*" ]; then current="$(printf '%s\n' "$names" | tr '\n' ' ')"; fi
+  width="$(tput cols 2>/dev/null || echo 120)"
+  while :; do
+    printf '\n%s\n' "$title" >&2
+    n=0
+    while IFS="$(printf '\t')" read -r name desc; do
+      if [ -z "$name" ]; then continue; fi
+      n=$((n + 1))
+      mark=" "
+      if in_list "$name" "$current"; then mark=x; fi
+      tag=""
+      if in_list "$name" "$new_names"; then tag=" (new)"; fi
+      printf '  %3d) [%s] %-30s%s  %s\n' "$n" "$mark" "$name" "$tag" "$desc" | cut -c1-"$width" >&2
+    done <<<"$items"
+    count=0
+    for name in $names; do
+      if in_list "$name" "$current"; then count=$((count + 1)); fi
+    done
+    if [ "$count" -eq "$total" ] && [ "$total" -gt 0 ]; then
+      printf '  all %d selected — saved as "*" (tracks skills added upstream later)\n' "$total" >&2
+    else
+      printf '  %d of %d selected\n' "$count" "$total" >&2
+    fi
+    printf 'Toggle numbers (space-separated), a=all, n=none, Enter=confirm: ' >&2
+    if ! read -r input; then
+      input=""
+      printf '\n' >&2
+    fi
+    case "$input" in
+      "") break ;;
+      a) current="$(printf '%s\n' "$names" | tr '\n' ' ')" ;;
+      n) current="" ;;
+      *)
+        for tok in $input; do
+          case "$tok" in
+            *[!0-9]*) warn "not a number: $tok" ;;
+            *)
+              if [ "$tok" -ge 1 ] && [ "$tok" -le "$total" ]; then
+                name="$(printf '%s\n' "$names" | sed -n "$((10#$tok))p")"
+                if in_list "$name" "$current"; then
+                  current="$(remove_from_list "$name" "$current")"
+                else
+                  current="$current $name"
+                fi
+              else
+                warn "out of range: $tok"
+              fi
+              ;;
+          esac
+        done
+        ;;
+    esac
+  done
+  picked=""
+  count=0
+  for name in $names; do
+    if in_list "$name" "$current"; then
+      picked="$picked $name"
+      count=$((count + 1))
+    fi
+  done
+  if [ "$count" -eq "$total" ] && [ "$total" -gt 0 ]; then
+    printf '*\n'
+  else
+    printf '%s\n' "${picked# }"
+  fi
+}
+
 # Yes/no confirmation for a risky step. Prompt goes to stderr. Default (Enter
 # or anything but y) = no, so a stray keypress never approves the action.
 prompt_confirm() {
