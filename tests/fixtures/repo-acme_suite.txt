@@ -1,0 +1,2 @@
+one	Suite skill one
+two	Suite skill two

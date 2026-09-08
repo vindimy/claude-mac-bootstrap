@@ -1,0 +1,105 @@
+#!/bin/bash
+# Fake `npx -y skills <cmd> ...` for tests. Logs each call (one line, the
+# args as given) to $FAKE_NPX_LOG and simulates the skills.sh CLI against the
+# sandbox HOME:
+#   add <repo> -l                  print a CLI-style listing from
+#                                  $FAKE_NPX_FIXTURES/repo-<owner_repo>.txt
+#   add <repo> -g -y [-a A] -s N.. create $HOME/.agents/skills/N/SKILL.md,
+#                                  link into agent dirs, record lock entries
+#   remove -g -y N..               delete store dirs, links, lock entries
+# FAKE_NPX_FAIL=1 makes add/remove exit 1; FAKE_NPX_LIST_FAIL=1 makes -l exit 1.
+set -u
+printf '%s\n' "$*" >>"${FAKE_NPX_LOG:?}"
+[ "${1:-}" = -y ] && shift
+if [ "${1:-}" != skills ]; then echo "fake npx: unexpected invocation: $*" >&2; exit 2; fi
+shift
+cmd="${1:-}"
+shift || true
+store="$HOME/.agents/skills"
+lock="$HOME/.agents/.skill-lock.json"
+
+fixture_for() { printf '%s/repo-%s.txt\n' "$FAKE_NPX_FIXTURES" "$(printf '%s' "$1" | tr '/' '_')"; }
+
+lock_edit() { # add|del repo names...
+  python3 - "$lock" "$@" <<'PY'
+import json, os, sys
+lock, op, repo = sys.argv[1], sys.argv[2], sys.argv[3]
+names = sys.argv[4:]
+d = {"version": 2, "skills": {}}
+if os.path.exists(lock):
+    d = json.load(open(lock))
+for n in names:
+    if op == "add":
+        d["skills"][n] = {"source": repo, "sourceType": "github",
+                          "skillPath": "skills/%s/SKILL.md" % n}
+    else:
+        d["skills"].pop(n, None)
+json.dump(d, open(lock, "w"), indent=1)
+PY
+}
+
+agent_dir() { case "$1" in codex) printf '%s/.codex/skills\n' "$HOME" ;; *) printf '%s/.claude/skills\n' "$HOME" ;; esac; }
+
+case "$cmd" in
+  add)
+    repo="$1"
+    shift
+    list=0
+    agents="claude-code codex"
+    names=""
+    mode=""
+    for a in "$@"; do
+      case "$a" in
+        -l) list=1 ;;
+        -g | -y) ;;
+        -a) mode=a ;;
+        -s) mode=s ;;
+        *)
+          case "$mode" in
+            a) agents="$(printf '%s' "$a" | tr ',' ' ')" ;;
+            s) names="$names $a" ;;
+          esac
+          ;;
+      esac
+    done
+    fx="$(fixture_for "$repo")"
+    if [ "$list" = 1 ]; then
+      [ "${FAKE_NPX_LIST_FAIL:-0}" = 1 ] && exit 1
+      [ -f "$fx" ] || { printf '\342\227\207  No skills found\n'; exit 0; }
+      n="$(grep -c . "$fx")"
+      printf '\033[1G\033[J\342\227\207  Found %s skills\n\342\224\202\n\342\227\207  Available Skills\n\342\224\202\n' "$n"
+      while IFS="$(printf '\t')" read -r name desc; do
+        [ -n "$name" ] || continue
+        printf '\342\224\202    %s\n\342\224\202\n\342\224\202      %s\n\342\224\202\n' "$name" "$desc"
+      done <"$fx"
+      printf '\342\224\224  Use --skill <name> to install specific skills\n'
+      exit 0
+    fi
+    [ "${FAKE_NPX_FAIL:-0}" = 1 ] && exit 1
+    if [ "$(printf '%s' "$names" | tr -d ' ')" = '*' ]; then
+      names="$(cut -f1 "$fx" | tr '\n' ' ')"
+    fi
+    for name in $names; do
+      mkdir -p "$store/$name"
+      printf -- '---\nname: %s\n---\n' "$name" >"$store/$name/SKILL.md"
+      for ag in $agents; do
+        d="$(agent_dir "$ag")"
+        mkdir -p "$d"
+        ln -sfn "$store/$name" "$d/$name"
+      done
+    done
+    # shellcheck disable=SC2086
+    lock_edit add "$repo" $names
+    ;;
+  remove)
+    [ "${FAKE_NPX_FAIL:-0}" = 1 ] && exit 1
+    names=""
+    for a in "$@"; do case "$a" in -g | -y) ;; *) names="$names $a" ;; esac; done
+    for name in $names; do
+      rm -rf "${store:?}/$name" "$HOME/.claude/skills/$name" "$HOME/.codex/skills/$name"
+    done
+    # shellcheck disable=SC2086
+    lock_edit del - $names
+    ;;
+  *) echo "fake npx: unsupported command: $cmd" >&2; exit 2 ;;
+esac

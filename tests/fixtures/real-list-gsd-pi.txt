@@ -1,0 +1,20 @@
+
+│
+●   claude-code_2-1-263_agent  Agent detected — installing non-interactively
+[?25l│
+◇  Source: https://github.com/open-gsd/gsd-pi.git
+[?25h[?25l│
+◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository….[1G[J◐  Cloning repository….[1G[J◓  Cloning repository….[1G[J◑  Cloning repository….[1G[J◒  Cloning repository….[1G[J◐  Cloning repository….[1G[J◓  Cloning repository….[1G[J◑  Cloning repository….[1G[J◒  Cloning repository…..[1G[J◐  Cloning repository…..[1G[J◓  Cloning repository…..[1G[J◑  Cloning repository…..[1G[J◒  Cloning repository…..[1G[J◐  Cloning repository…..[1G[J◓  Cloning repository…..[1G[J◑  Cloning repository…..[1G[J◒  Cloning repository…...[1G[J◐  Cloning repository…...[1G[J◓  Cloning repository…...[1G[J◑  Cloning repository…...[1G[J◒  Cloning repository…...[1G[J◐  Cloning repository…...[1G[J◓  Cloning repository…...[1G[J◑  Cloning repository…...[1G[J◒  Cloning repository…...[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◇  Repository cloned
+[?25h[?25l│
+[1G[J◇  Found 1 skill
+[?25h
+│
+◇  Available Skills
+│
+│    gsd-orchestrator
+│
+│      Build software products autonomously via GSD headless mode. Handles the full lifecycle: write a spec, launch a build, poll for completion, handle blockers, track costs, and verify the result. Use when asked to "build something", "create a project", "run gsd", "check build status", or any task that requires autonomous software development via subprocess.
+
+│
+└  Use --skill <name> to install specific skills
+

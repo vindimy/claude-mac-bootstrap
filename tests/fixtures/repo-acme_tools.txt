@@ -1,0 +1,3 @@
+alpha	First skill, does alpha things
+beta	Second skill, does beta things
+gamma	Third skill, does gamma things
