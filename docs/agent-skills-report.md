@@ -179,9 +179,51 @@ SKILLS_NeoLabHQ__context_engineering_kit="agent-evaluation cause-and-effect cont
 
 `softaworks`, `mattpocock`, `superpowers`, `gsd-pi` and `composiohq` are unchanged. Net
 effect on the store: roughly +45 marketing, personal-ops and finance skills, −15 unused ones.
-Run `claude-context-audit.sh` before and after; if the skills catalogue grows more than the
-audit's threshold, move the Olya-only marketing set into that repo's project skills instead
-of the global store.
+
+### Applied 2026-09-09: audit delta
+
+The lines above were written to `~/.mac-bootstrap/skills.conf` (previous file kept as
+`skills.conf.pre-2026-09-09.bak`) and `./update.sh` ran clean. The store went from 116 to
+160 skills; the lock file attributes exactly the selected names to each source.
+
+`claude-context-audit.sh` before and after (headless probe, global config only):
+
+| | Tools | Tool bytes | Input tokens | Skills listed | With description | Name only |
+|---|---|---|---|---|---|---|
+| Before | 13 | 28,498 | 28,957 | 91 | 83 | 8 |
+| After | 13 | 28,498 | 28,969 | 134 | 62 | 72 |
+
+The token count is flat because Claude Code caps the skills section: every skill is listed
+by name, but descriptions are added only while a budget of about 30 KB lasts (29.7 KB before,
+29.4 KB after). Adding 44 skills therefore cost no tokens and instead **stripped the
+description from 72 skills**, which is what the model uses to decide when to invoke one. Among
+the name-only set after the change: `seo-audit`, `schema`, `social`, `marketing-plan`,
+`marketing-context`, `offers`, `pricing`, `product-marketing`, `video`,
+`review-local-changes`, `test-prompt`, `write-tests`, every `cloudflare:*` skill,
+`frontend-design`, and `superpowers:verification-before-completion`,
+`superpowers:requesting-code-review`, `superpowers:using-git-worktrees`. Explicit `/name`
+invocation still works for all of them; automatic triggering does not.
+
+Two ways to get the descriptions back, both reversible:
+
+1. **Hide the explicit-only skills from the model.** The managed `skillOverrides` map in
+   `dotfiles/.claude/settings.json` already marks 147 skills `user-invocable-only`, which drops
+   them from the listing entirely. Most of the additions are things you would call by name
+   anyway (`inbox-setup`, `weekly-review`, the five household-finance skills, the four
+   decision skills, `youtube-downloader`, `file-organizer`, `invoice-organizer`,
+   `image-enhancer`, `meeting-insights-analyzer`, `competitive-ads-extractor`,
+   `lead-research-assistant`, `cfo-review`, `cmo-review`, `founder-mode`, `linkedin-content`,
+   `webinar-marketing`, `events`, `launch`, `popups`, `lead-magnets`, `influencer-marketing`,
+   `co-marketing`, `community-marketing`, `referrals`, `prospecting`, `cold-email`, `image`,
+   `social-media-analyzer`, `memory-engineering`, `agent-memory`, `meetings`,
+   `reviews-retros-reflection`). Marking those frees roughly 20 KB, enough for the
+   auto-trigger skills to keep their descriptions.
+2. **Move the Olya-only marketing set out of the global store** and install it per project
+   in that repo (`npx skills add <repo> -s ...` without `-g`), so its descriptions are loaded
+   only where they apply.
+
+Option 1 is the smaller change and keeps one place of truth; option 2 is the right shape
+long-term for engagement-specific kits. Neither has been applied yet.
 
 Plugins (in `dotfiles/.claude/settings.json`): keep `superpowers`, `frontend-design`,
 `context-mode`, `cloudflare` on. Enable `humanizer` and `document-skills` when the Olya
@@ -192,8 +234,9 @@ a trimmed install plan. Same per-project treatment for `claude-mem`.
 
 ## Actions, in order of payoff
 
-1. **Apply the `skills.conf` changes above and run `./update.sh`.** Then run the context
-   audit and record the delta.
+1. ~~Apply the `skills.conf` changes above and run `./update.sh`.~~ Done 2026-09-09; delta
+   recorded above. **Open decision:** restore descriptions for the auto-trigger skills via
+   `skillOverrides` (option 1) or per-project installs (option 2).
 2. **Start the SEO engagements with the audit chain:** `seo-audit` → `schema` →
    `local-seo-manager` → `analytics` + `analytics-tracking` → `web-perf` → `cro`. Same
    sequence for Veda and Tracy; the second run is mostly reuse.
@@ -223,4 +266,9 @@ a trimmed install plan. Same per-project treatment for `claude-mem`.
   `small-business-static-site` standard instead of restating it.
 - [ ] **Package `small-business-static-site` as a skill** with `create-skill` once the
   refactor lands.
-- [ ] **Apply the selection changes** (action 1) and note the context-audit delta here.
+- [x] **Apply the selection changes** (action 1). Done 2026-09-09; delta recorded under
+  "Applied 2026-09-09: audit delta".
+- [ ] **Restore skill descriptions** for the auto-trigger set: extend `skillOverrides` in
+  `dotfiles/.claude/settings.json` (option 1) or move the marketing kit to per-project
+  installs (option 2), then re-run the audit and confirm `seo-audit`, `schema`,
+  `marketing-plan`, `cloudflare:*` and the superpowers skills list with descriptions again.
