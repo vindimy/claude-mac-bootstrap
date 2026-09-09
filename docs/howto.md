@@ -130,6 +130,17 @@ docker context, so existing projects work unchanged:
   plugins, because `claude plugin install` marks each plugin enabled and the
   managed profile keeps part of the roster installed-but-disabled.
 - `--dry-run` prints the copy without touching the live file.
+- To see what the lean profile actually buys, run `claude-context-audit.sh`
+  (installed by `install.sh`). It needs `node` on PATH and one API request;
+  results and the full request dump land under
+  `~/.local/state/claude-context-audit/`. If it reports input tokens up 10%+
+  since the last run, find the new tool in its ranked table and add it to
+  `permissions.deny` (bare name — a scoped rule like `Bash(rm *)` blocks the
+  call but keeps the schema in the payload) or turn the feature off with a
+  `disable*` flag; for a skill, set it to `user-invocable-only` in
+  `skillOverrides`. Restart Claude Code and re-run the audit to confirm.
+- Port 8787 busy? The script walks up to the next free port. A stuck proxy
+  from an interrupted run: `lsof -nP -iTCP:8787` and kill it.
 
 ## claude-plugins
 

@@ -45,6 +45,7 @@ case removals proceed without prompting and settings are kept.
 |---|---|---|
 | `dotfiles/.zprofile` | `~/.zprofile` and `~/.profile` (symlinks) | Login-shell env for zsh and bash: Homebrew, PATH, Java/Android; triggers the daily dropbox-ignore-git sweep |
 | `bin/dropbox-ignore-git.sh` | `~/.local/bin/dropbox-ignore-git.sh` (symlink) | Marks every `.git` dir under `~/Library/CloudStorage/Dropbox` with `com.dropbox.ignored=1` so Dropbox sync can never corrupt a git index; no-ops on machines without a Dropbox folder |
+| `bin/claude-context-audit.sh` | `~/.local/bin/claude-context-audit.sh` (symlink) | Measures the hidden per-turn payload Claude Code sends the model (tool schemas, skills catalogue, system prompt) through a local logging proxy and keeps a history so growth is visible; see [Claude Code context audit](#claude-code-context-audit) |
 | `dotfiles/.claude/settings.json` | `~/.claude/settings.json` (copy, written by the `claude-code` unit on every install/update) | Global Claude Code settings: enabled plugins, tool deny list, skill visibility, feature flags. Lean profile from the 2026-09-05 system-prompt trim. The repo copy is authoritative: local edits (including ones Claude Code makes itself) are overwritten on the next run, so change the repo file instead. A copy rather than a symlink because Claude Code rewrites the file; `~/.claude` otherwise stays per-machine and is git-ignored apart from this file |
 | `dotfiles/.claude/statusline-command.sh` | `~/.claude/statusline-command.sh` (copy, written by the `claude-code` unit on every install/update) | Status line script that `settings.json` points at (`statusLine.command`): repo name, git branch, context-usage bar, model. Needs `jq` (ships with macOS 15+). Repo copy is authoritative, same as `settings.json` |
 
@@ -136,6 +137,34 @@ self-updating are left to their own updaters unless missing.
 - Dropbox is optional everywhere: the sweep exits silently when
   `~/Library/CloudStorage/Dropbox` doesn't exist, so machines without Dropbox
   pay nothing.
+
+## Claude Code context audit
+
+- **Why:** every Claude Code turn ships tool definitions, a skills catalogue and
+  feature instructions you never see and pay for every time. The lean profile in
+  `dotfiles/.claude/settings.json` trims it (bare-name `permissions.deny`,
+  `disable*` flags, `skillOverrides`), but Claude Code releases, plugins and
+  skills add it back. Measuring on a cadence is the only way to notice.
+- **How:** `claude-context-audit.sh` fetches Matt Pocock's zero-dependency
+  [agent-proxy](https://gist.github.com/mattpocock/5b3d76ea21f5f698aefded47a9cea3b1)
+  (pinned gist revision, not vendored — no licence stated), starts it on a local
+  port, sends one headless `claude -p` probe through it from an empty directory
+  (global config only — no project CLAUDE.md or MCP servers), and records the
+  proxy's ranked summary (tool count, tool bytes, real input tokens) in
+  `~/.local/state/claude-context-audit/history.tsv`. It prints the top tools, the
+  delta against the previous run (warns at +10%), and the path to the full
+  request dump (system prompt + every tool schema as Markdown) under
+  `~/.local/state/claude-context-audit/agent-proxy/logs/`.
+  `--interactive` opens a normal session through the proxy instead;
+  `--here` probes the current project; `--dry-run` prints the plan.
+- **Cadence:** the script is never run unattended (one probe = one API request
+  of your usual per-turn size). Instead `.zprofile`, `run.sh` and `update.sh`
+  print a one-line reminder when the last run is 30+ days old or missing
+  (`claude-context-audit.sh --due`). Run it after each Claude Code upgrade or
+  plugin/skill change, and act on growth by editing the repo's
+  `dotfiles/.claude/settings.json`. The per-session glance is the managed
+  status line's context bar. Method and rationale:
+  [aihero.dev, "How To Kill The Bloat In Claude Code's System Prompt"](https://www.aihero.dev/how-to-kill-the-bloat-in-claude-codes-system-prompt).
 
 ## History
 
