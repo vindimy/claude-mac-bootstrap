@@ -223,7 +223,46 @@ Two ways to get the descriptions back, both reversible:
    only where they apply.
 
 Option 1 is the smaller change and keeps one place of truth; option 2 is the right shape
-long-term for engagement-specific kits. Neither has been applied yet.
+long-term for engagement-specific kits.
+
+### Applied 2026-09-09: both options
+
+**Option 1, globally.** `skillOverrides` in `dotfiles/.claude/settings.json` grew from 147 to
+171 entries: the inbox, weekly-review, meetings, memory, decision, household-finance,
+`youtube-downloader`, `one-pager-prd`, `image` and the explicit-call context-engineering-kit
+skills are now `user-invocable-only`.
+
+**Option 2, per project.** The engagement kits left the global store and were installed with
+the skills.sh CLI without `-g` (lock file `skills-lock.json` in each repo):
+
+| Repo | Skills | Kit |
+|---|---|---|
+| `claude-olya-branding` | 30 | marketing-context, marketing-ops, marketing-plan, product-marketing, offers, pricing, pricing-strategist, content-strategy, content-production, social + social-media-manager/-content/-analyzer, video + video-content-strategist, emails, email-sequence, lead-magnets, popups, events, webinar-marketing, launch, community-, influencer-, co-marketing, referrals, brand-guidelines, competitor-profiling, competitive-ads-extractor, marketing-ideas. Committed. |
+| `claude-personal-branding` | 8 | linkedin-content, content-strategy, content-production, social, social-content, social-media-manager, marketing-context, brand-guidelines. Not a git clone locally; nothing committed. |
+| `claude-nyamaste-studios-strategy` | 18 | contract-and-proposal-writer, founder-coach, cfo-advisor, founder-mode, cmo-review, cfo-review, pricing-strategist, marketing-context, marketing-ops, marketing-plan, product-marketing, offers, pricing, prospecting, cold-email, competitor-profiling, marketing-ideas, lead-research-assistant. Not a git clone locally; nothing committed. |
+
+The global store is now 120 skills. `skills.conf` keeps the SEO kit
+(`seo-audit schema ai-seo analytics cro copywriting copy-editing customer-research image`),
+the local-SEO and personal-ops set from alirezarezvani, all of lyndonkl and the
+context-engineering-kit selection; the ComposioHQ line lost `competitive-ads-extractor` and
+`lead-research-assistant`.
+
+Audit after both options:
+
+| Probe | Tools | Tool bytes | Input tokens | Listed | With description | Name only |
+|---|---|---|---|---|---|---|
+| Global, before option 1 | 13 | 28,498 | 28,969 | 134 | 62 | 72 |
+| Global, after | 13 | 28,498 | 26,030 | 66 | 66 | 0 |
+| Inside `claude-olya-branding` | 13 | 28,498 | 29,631 | 101 | 65 | 36 |
+
+Globally every listed skill has its description again, including `seo-audit`, `schema`,
+`cloudflare:*` and the superpowers guards, and the per-turn payload dropped by about 10%.
+Inside the Olya repo the 30-skill kit fills the budget on its own: `marketing-context`,
+`marketing-plan` and the SEO set are described, but `social-media-manager`, `video`,
+`webinar-marketing`, the cloudflare and context-mode skills and
+`superpowers:verification-before-completion` are name-only there. Acceptable for a branding
+repo (no Workers, no code), and the remaining lever is a project `.claude/settings.json` with
+its own `skillOverrides` for the global engineering skills that repo never needs.
 
 Plugins (in `dotfiles/.claude/settings.json`): keep `superpowers`, `frontend-design`,
 `context-mode`, `cloudflare` on. Enable `humanizer` and `document-skills` when the Olya
@@ -235,8 +274,8 @@ a trimmed install plan. Same per-project treatment for `claude-mem`.
 ## Actions, in order of payoff
 
 1. ~~Apply the `skills.conf` changes above and run `./update.sh`.~~ Done 2026-09-09; delta
-   recorded above. **Open decision:** restore descriptions for the auto-trigger skills via
-   `skillOverrides` (option 1) or per-project installs (option 2).
+   recorded above. Both fixes applied the same day: `skillOverrides` extended globally and
+   the engagement kits moved to project-level installs in three repos.
 2. **Start the SEO engagements with the audit chain:** `seo-audit` → `schema` →
    `local-seo-manager` → `analytics` + `analytics-tracking` → `web-perf` → `cro`. Same
    sequence for Veda and Tracy; the second run is mostly reuse.
@@ -268,7 +307,10 @@ a trimmed install plan. Same per-project treatment for `claude-mem`.
   refactor lands.
 - [x] **Apply the selection changes** (action 1). Done 2026-09-09; delta recorded under
   "Applied 2026-09-09: audit delta".
-- [ ] **Restore skill descriptions** for the auto-trigger set: extend `skillOverrides` in
-  `dotfiles/.claude/settings.json` (option 1) or move the marketing kit to per-project
-  installs (option 2), then re-run the audit and confirm `seo-audit`, `schema`,
-  `marketing-plan`, `cloudflare:*` and the superpowers skills list with descriptions again.
+- [x] **Restore skill descriptions** for the auto-trigger set. Done 2026-09-09 with both
+  options; global audit shows 66 of 66 listed skills described.
+- [ ] **Project `skillOverrides` for `claude-olya-branding`** to hide the global engineering
+  skills that repo never needs, so its own kit keeps full descriptions (36 name-only today).
+- [ ] **Clone `claude-personal-branding` and `claude-nyamaste-studios-strategy`** as git
+  repos locally (the Dropbox folders have no `.git`) and commit their `skills-lock.json`
+  and installed kits.
