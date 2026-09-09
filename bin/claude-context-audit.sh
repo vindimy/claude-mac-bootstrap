@@ -2,8 +2,8 @@
 # Claude Code context audit: measure the hidden per-turn payload (tool schemas,
 # skills catalogue, system prompt) and track it over time.
 #
-# Runs Matt Pocock's zero-dependency logging proxy (agent-proxy, proxy.mjs)
-# between Claude Code and the API, sends one headless probe through it, and
+# Runs Matt Pocock's zero-dependency logging proxy (agent-proxy, vendored as
+# bin/agent-proxy.mjs beside this script) between Claude Code and the API, sends one headless probe through it, and
 # records the proxy's ranked summary: tool count, tool bytes, real input
 # tokens. Each run is appended to history.tsv so growth is visible, and a
 # stamp file lets .zprofile / run.sh / update.sh nag when an audit is due.
@@ -11,21 +11,19 @@
 # Managed by the claude-mac-bootstrap repo (bin/claude-context-audit.sh);
 # install.sh symlinks it into ~/.local/bin. Bash 3.2 compatible.
 #
-# Usage: claude-context-audit.sh [--interactive] [--here] [--refresh]
-#                                [--top N] [--dry-run] | --due | --help
+# Usage: claude-context-audit.sh [--interactive] [--here] [--top N] [--dry-run]
+#                                | --due | --help
 set -u
 
-# The proxy is fetched (not vendored — the gist carries no licence) from a
-# pinned revision so a run today and a run next year measure the same way.
-PROXY_GIST_ID="5b3d76ea21f5f698aefded47a9cea3b1"
-PROXY_GIST_REV="e142f08fd2d1de0adc914355112d6f2b56386959"
-PROXY_URL="https://gist.githubusercontent.com/mattpocock/$PROXY_GIST_ID/raw/$PROXY_GIST_REV/proxy.mjs"
+# The proxy is vendored (bin/agent-proxy.mjs, provenance in its header) and
+# copied next to its logs on every run when it differs, so a run today and a
+# run next year measure the same way and the repo is the single source.
 PROXY_PORT_DEFAULT=8787
 DUE_AFTER_DAYS=30
 PROBE_PROMPT="Reply with exactly: ok"
 
 STATE_DIR="${CLAUDE_CONTEXT_AUDIT_STATE:-$HOME/.local/state/claude-context-audit}"
-PROXY_DIR="$STATE_DIR/agent-proxy"     # proxy.mjs lives here; it writes logs/ beside itself
+PROXY_DIR="$STATE_DIR/agent-proxy"     # the proxy runs from here; it writes logs/ beside itself
 PROXY_FILE="$PROXY_DIR/proxy.mjs"
 PROBE_DIR="$STATE_DIR/probe"           # empty dir: no project CLAUDE.md, no project MCP servers
 HISTORY_FILE="$STATE_DIR/history.tsv"
@@ -33,6 +31,14 @@ STAMP_FILE="$STATE_DIR/last-run.stamp"
 CLAUDE_BIN="$HOME/.local/bin/claude"
 
 # --- pure helpers (also sourced by tests with CLAUDE_CONTEXT_AUDIT_LIB=1) ----
+
+# The vendored proxy lives beside this script's real file (install.sh symlinks
+# the script into ~/.local/bin; the symlink target is absolute).
+cca_proxy_src() {
+  local self="${BASH_SOURCE[0]}"
+  while [ -L "$self" ]; do self="$(readlink "$self")"; done
+  printf '%s/agent-proxy.mjs\n' "$(cd "$(dirname "$self")" && pwd)"
+}
 
 # "[agent-proxy] 69 tools · 154,946 tool bytes · 65,538 real input tokens"
 # -> "69<TAB>154946<TAB>65538" (tokens empty if the proxy saw no usage event).
@@ -127,7 +133,7 @@ cca_due() {
 
 usage() {
   cat <<'USAGE'
-Usage: claude-context-audit.sh [--interactive] [--here] [--refresh] [--top N] [--dry-run]
+Usage: claude-context-audit.sh [--interactive] [--here] [--top N] [--dry-run]
        claude-context-audit.sh --due
        claude-context-audit.sh --help
 
@@ -143,7 +149,6 @@ prompt, every tool schema) is kept as Markdown under
                  request of the session is recorded
   --here         probe from the current directory (includes this project's
                  CLAUDE.md, MCP servers, plugins) instead of the neutral dir
-  --refresh      re-download proxy.mjs (pinned revision)
   --top N        rows of the ranked tool table to print (default 12)
   --dry-run      print what would run; touch nothing
   --due          exit 0 and print a line when the last audit is 30+ days old
@@ -155,14 +160,12 @@ USAGE
 
 MODE=headless
 WHERE=global
-REFRESH=0
 DRY_RUN=0
 TOP=12
 while [ $# -gt 0 ]; do
   case "$1" in
     --interactive) MODE=interactive ;;
     --here) WHERE=here ;;
-    --refresh) REFRESH=1 ;;
     --dry-run) DRY_RUN=1 ;;
     --top)
       shift
@@ -199,11 +202,7 @@ if [ "$WHERE" = here ]; then RUN_DIR="$PWD"; else RUN_DIR="$PROBE_DIR"; fi
 
 if [ "$DRY_RUN" = 1 ]; then
   say "[dry-run] state dir: $STATE_DIR"
-  if [ ! -f "$PROXY_FILE" ] || [ "$REFRESH" = 1 ]; then
-    say "[dry-run] curl -fsSL $PROXY_URL -o $PROXY_FILE"
-  else
-    say "[dry-run] proxy.mjs present (gist rev ${PROXY_GIST_REV%${PROXY_GIST_REV#????????????}})"
-  fi
+  say "[dry-run] cp $(cca_proxy_src) $PROXY_FILE   # when it differs"
   say "[dry-run] (cd $PROXY_DIR && PORT=$PORT node proxy.mjs)   # background"
   if [ "$MODE" = interactive ]; then
     say "[dry-run] (cd $RUN_DIR && ANTHROPIC_BASE_URL=$BASE_URL claude)"
@@ -218,12 +217,9 @@ fi
 command -v node >/dev/null 2>&1 || die "node not found — brew install node (the proxy needs Node 18+)"
 
 mkdir -p "$PROXY_DIR" "$PROBE_DIR"
-if [ ! -f "$PROXY_FILE" ] || [ "$REFRESH" = 1 ]; then
-  say "fetching agent-proxy (gist rev ${PROXY_GIST_REV%${PROXY_GIST_REV#????????????}}) …"
-  curl -fsSL "$PROXY_URL" -o "$PROXY_FILE.tmp" || die "could not download $PROXY_URL"
-  grep -q 'agent-proxy' "$PROXY_FILE.tmp" || die "downloaded file does not look like proxy.mjs"
-  mv "$PROXY_FILE.tmp" "$PROXY_FILE"
-fi
+PROXY_SRC="$(cca_proxy_src)"
+[ -f "$PROXY_SRC" ] || die "vendored proxy missing: $PROXY_SRC"
+cmp -s "$PROXY_SRC" "$PROXY_FILE" || cp "$PROXY_SRC" "$PROXY_FILE" || die "could not copy the proxy to $PROXY_FILE"
 
 PROXY_OUT="$(mktemp "${TMPDIR:-/tmp}/claude-context-audit.XXXXXX")"
 PROXY_PID=""

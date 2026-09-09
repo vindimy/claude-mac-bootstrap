@@ -94,13 +94,17 @@ before="$(stat -f %m "$stamp")"
 out="$("$AUDIT" --dry-run 2>&1)"
 assert_contains "$out" "ANTHROPIC_BASE_URL=http://localhost:" "dry-run shows the probe env"
 assert_contains "$out" "claude -p" "dry-run shows the headless probe"
-assert_contains "$out" "proxy.mjs" "dry-run mentions the proxy"
+assert_contains "$out" "cp $REPO_ROOT/bin/agent-proxy.mjs" "dry-run copies the vendored proxy"
+assert_not_contains "$out" "curl" "dry-run never downloads"
 assert_eq "$before" "$(stat -f %m "$stamp")" "dry-run leaves the stamp alone"
 assert_contains "$("$AUDIT" --dry-run --interactive 2>&1)" "claude)" "dry-run interactive shows a plain claude launch"
 assert_contains "$("$AUDIT" --dry-run --here 2>&1)" "$PWD" "dry-run --here probes the current dir"
-assert_not_contains "$("$AUDIT" --dry-run 2>&1)" "$PWD" "dry-run default probes the neutral dir"
+assert_not_contains "$("$AUDIT" --dry-run 2>&1)" "(cd $PWD " "dry-run default probes the neutral dir"
 
 # --- usage -------------------------------------------------------------------
 assert_fail "unknown flag rejected" bogus_quiet
+refresh_quiet() { "$AUDIT" --refresh >/dev/null 2>&1; }
+assert_fail "--refresh is gone with the download" refresh_quiet
+assert_eq "$REPO_ROOT/bin/agent-proxy.mjs" "$(cca_proxy_src)" "vendored proxy resolved beside the script"
 assert_contains "$("$AUDIT" --help)" "Usage:" "help prints usage"
 finish
