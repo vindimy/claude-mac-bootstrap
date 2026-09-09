@@ -72,6 +72,7 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `claude-code` | Claude Code | native installer `claude.ai/install.sh` (self-updates); brew cask dropped — it trails releases; also copies `dotfiles/.claude/settings.json` and `dotfiles/.claude/statusline-command.sh` into `~/.claude/` (repo wins; re-applied on every update) |
 | `gemini` | Google Gemini Desktop | brew cask `google-gemini` (self-updates) |
 | `gemini-cli` | Gemini CLI | brew formula `gemini-cli` |
+| `gh` | GitHub CLI | brew formula `gh`; run `gh auth login` once — the issue tracker convention in `docs/agents/issue-tracker.md` depends on it |
 | `chatgpt` | ChatGPT | brew cask `chatgpt` (self-updates) |
 | `maccy` | Maccy | brew cask `maccy` |
 | `iterm` | iTerm2 | brew cask `iterm2` (self-updates) |
