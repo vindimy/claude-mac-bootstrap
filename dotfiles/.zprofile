@@ -41,3 +41,15 @@ if [ -x "$HOME/.local/bin/dropbox-ignore-git.sh" ]; then
   fi
   unset _dbig_stamp
 fi
+
+# Monthly reminder: audit what Claude Code sends the model on every turn
+# (bin/claude-context-audit.sh, symlinked into ~/.local/bin by install.sh).
+# Only nags — the audit itself costs one API request, so it is never run
+# unattended. Stamp is touched by the script on each run.
+if [ -t 1 ] && [ -x "$HOME/.local/bin/claude" ] && [ -x "$HOME/.local/bin/claude-context-audit.sh" ]; then
+  _cca_stamp="$HOME/.local/state/claude-context-audit/last-run.stamp"
+  if [ ! -f "$_cca_stamp" ] || [ -n "$(find "$_cca_stamp" -mtime +29 2>/dev/null)" ]; then
+    echo "claude-context-audit: 30+ days since the last Claude Code payload audit (or never run) — run claude-context-audit.sh"
+  fi
+  unset _cca_stamp
+fi

@@ -172,3 +172,13 @@ validate_selection() {
     fi
   done
 }
+
+# One-line reminder when the Claude Code context audit is 30+ days old or has
+# never run (bin/claude-context-audit.sh --due decides; it is quiet and exits 1
+# when nothing is due or Claude Code is not installed). Called at the end of
+# run.sh and update.sh — the moments plugins, skills, and Claude Code change.
+context_audit_nag() {
+  local msg
+  msg="$("$REPO_ROOT/bin/claude-context-audit.sh" --due 2>/dev/null)" || return 0
+  log "  $msg"
+}

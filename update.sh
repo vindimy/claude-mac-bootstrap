@@ -79,6 +79,7 @@ done
 log ""
 log "Summary:"
 if [ -n "$UPDATED" ]; then log "  updated:$UPDATED"; fi
+context_audit_nag
 if [ -n "$FAILED" ]; then
   err "failed:$FAILED (see messages above)"
   exit 1

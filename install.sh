@@ -37,5 +37,6 @@ link "$REPO/dotfiles/.zprofile" "$HOME/.zprofile"
 # Same file serves bash login shells (it is plain POSIX sh).
 link "$REPO/dotfiles/.zprofile" "$HOME/.profile"
 link "$REPO/bin/dropbox-ignore-git.sh" "$HOME/.local/bin/dropbox-ignore-git.sh"
+link "$REPO/bin/claude-context-audit.sh" "$HOME/.local/bin/claude-context-audit.sh"
 
 echo "done"

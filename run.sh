@@ -213,6 +213,7 @@ for id in $INSTALLED; do
   note="$(app_note_for "$id")"
   if [ -n "$note" ]; then log "  NOTE [$(app_name_for "$id")]: $note"; fi
 done
+context_audit_nag
 if [ -n "$FAILED" ]; then
   err "failed:$FAILED (see messages above)"
   exit 1
