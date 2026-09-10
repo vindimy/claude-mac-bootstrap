@@ -26,7 +26,7 @@ skills_conf_put acme/tools "beta"
 unset SKILLS_SYNCED_UNITS
 : >"$FAKE_NPX_LOG"
 assert_ok "update (new process)" skills_unit_update "$UNIT" "$ROSTER" ""
-assert_contains "$(npx_log)" "add acme/tools -g -y -a claude-code codex -s beta" "update installs saved list"
+assert_contains "$(npx_log)" "add acme/tools -g -y -a claude-code codex gemini-cli -s beta" "update installs saved list"
 assert_contains "$(npx_log)" "remove -g -y alpha gamma" "update removes deselected"
 assert_eq "beta" "$(skills_conf_get acme/tools)" "saved selection untouched by non-interactive update"
 

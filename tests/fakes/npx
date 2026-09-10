@@ -38,14 +38,14 @@ json.dump(d, open(lock, "w"), indent=1)
 PY
 }
 
-agent_dir() { case "$1" in codex) printf '%s/.codex/skills\n' "$HOME" ;; *) printf '%s/.claude/skills\n' "$HOME" ;; esac; }
+agent_dir() { case "$1" in codex) printf '%s/.codex/skills\n' "$HOME" ;; gemini-cli) printf '%s/.gemini/skills\n' "$HOME" ;; *) printf '%s/.claude/skills\n' "$HOME" ;; esac; }
 
 case "$cmd" in
   add)
     repo="$1"
     shift
     list=0
-    agents="claude-code codex"
+    agents="claude-code codex gemini-cli"
     names=""
     mode=""
     for a in "$@"; do
@@ -96,7 +96,7 @@ case "$cmd" in
     names=""
     for a in "$@"; do case "$a" in -g | -y) ;; *) names="$names $a" ;; esac; done
     for name in $names; do
-      rm -rf "${store:?}/$name" "$HOME/.claude/skills/$name" "$HOME/.codex/skills/$name"
+      rm -rf "${store:?}/$name" "$HOME/.claude/skills/$name" "$HOME/.codex/skills/$name" "$HOME/.gemini/skills/$name"
     done
     # shellcheck disable=SC2086
     lock_edit del - $names

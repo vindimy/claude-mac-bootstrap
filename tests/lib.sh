@@ -63,7 +63,7 @@ assert_fail() { # label cmd args...
 setup_sandbox() {
   SANDBOX="$(mktemp -d)"
   export HOME="$SANDBOX/home"
-  mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex/skills"
+  mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex/skills" "$HOME/.gemini/skills"
   export BOOTSTRAP_CONFIG_DIR="$SANDBOX/config"
   export FAKE_NPX_LOG="$SANDBOX/npx.log"
   : >"$FAKE_NPX_LOG"

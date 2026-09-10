@@ -177,17 +177,20 @@ skills_agent_dir() {
   case "$1" in
     codex) printf '%s/.codex/skills\n' "$HOME" ;;
     claude | claude-code) printf '%s/.claude/skills\n' "$HOME" ;;
+    gemini | gemini-cli) printf '%s/.gemini/skills\n' "$HOME" ;;
     *) printf '%s/.%s/skills\n' "$HOME" "$1" ;;
   esac
 }
 
 # The agent's home dir — proof the agent is installed. (Codex reads the shared
 # store ~/.agents/skills directly; the CLI creates no links under
-# ~/.codex/skills, so that dir is not a usable readiness signal.)
+# ~/.codex/skills, so that dir is not a usable readiness signal. Gemini CLI
+# reads ~/.gemini/skills, which apps/gemini-cli.sh creates on install.)
 skills_agent_home() {
   case "$1" in
     codex) printf '%s/.codex\n' "$HOME" ;;
     claude | claude-code) printf '%s/.claude\n' "$HOME" ;;
+    gemini | gemini-cli) printf '%s/.gemini\n' "$HOME" ;;
     *) printf '%s/.%s\n' "$HOME" "$1" ;;
   esac
 }
@@ -197,7 +200,7 @@ skills_agent_home() {
 # auto-selection (add -g -y with no -a) appends every ".agents/skills" agent,
 # including ones with no global dir, and reports them as failures
 # (vercel-labs/skills#1424, open since 2026-06).
-SKILLS_KNOWN_AGENTS="claude-code codex"
+SKILLS_KNOWN_AGENTS="claude-code codex gemini-cli"
 
 skills_installed_agents() {
   local a out=""
@@ -283,7 +286,7 @@ skills_purge_untracked() {
   local name d
   for name in $1; do
     if skills_lock_has "$name"; then continue; fi
-    for d in "$SKILLS_STORE/$name" "$HOME/.claude/skills/$name" "$HOME/.codex/skills/$name"; do
+    for d in "$SKILLS_STORE/$name" "$HOME/.claude/skills/$name" "$HOME/.codex/skills/$name" "$HOME/.gemini/skills/$name"; do
       if [ -e "$d" ] || [ -L "$d" ]; then
         log "removing untracked local skill copy: $d"
         run_cmd rm -rf "$d"
