@@ -1,0 +1,61 @@
+#!/bin/bash
+# Fake `claude|codex|gemini mcp ...` for tests. $1 is the agent name (passed
+# by the tests/fakes/<agent> wrappers), the rest the CLI args. Logs
+# "<agent> <args>" to $FAKE_MCP_LOG. The per-agent server list lives in
+# $FAKE_MCP_DIR/<agent>, one name per line; the gemini fake also writes a
+# real ~/.gemini/settings.json with mcpServers so lib/mcp.sh's JSON detection
+# path is exercised.
+#   mcp get NAME                 exit 0 if NAME is in the store
+#   mcp add [options] NAME ...   add NAME (first positional after the options)
+#   mcp remove [options] NAME    remove NAME
+#   mcp list                     print the store
+# FAKE_MCP_FAIL=1 makes add/remove exit 1.
+set -u
+agent="$1"
+shift
+printf '%s %s\n' "$agent" "$*" >>"${FAKE_MCP_LOG:?}"
+store="${FAKE_MCP_DIR:?}/$agent"
+touch "$store"
+if [ "${1:-}" != mcp ]; then echo "fake $agent: unsupported invocation: $*" >&2; exit 2; fi
+shift
+cmd="${1:-}"
+shift || true
+
+name=""
+skip=0
+for a in "$@"; do
+  if [ "$skip" = 1 ]; then skip=0; continue; fi
+  case "$a" in
+    -s | --scope | -t | --transport | --url) skip=1 ;;
+    --) break ;;
+    -*) ;;
+    *) name="$a"; break ;;
+  esac
+done
+
+gemini_sync() {
+  if [ "$agent" != gemini ]; then return 0; fi
+  mkdir -p "$HOME/.gemini"
+  python3 - "$HOME/.gemini/settings.json" "$store" <<'PY'
+import json, sys
+names = [l.strip() for l in open(sys.argv[2]) if l.strip()]
+json.dump({"mcpServers": {n: {"command": "fake"} for n in names}}, open(sys.argv[1], "w"))
+PY
+}
+
+case "$cmd" in
+  get) grep -qx "$name" "$store" ;;
+  add)
+    if [ "${FAKE_MCP_FAIL:-0}" = 1 ]; then exit 1; fi
+    grep -qx "$name" "$store" || printf '%s\n' "$name" >>"$store"
+    gemini_sync
+    ;;
+  remove)
+    if [ "${FAKE_MCP_FAIL:-0}" = 1 ]; then exit 1; fi
+    grep -vx "$name" "$store" >"$store.tmp" || true
+    mv "$store.tmp" "$store"
+    gemini_sync
+    ;;
+  list) cat "$store" ;;
+  *) echo "fake $agent: unsupported mcp command: $cmd" >&2; exit 2 ;;
+esac

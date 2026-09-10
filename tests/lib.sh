@@ -72,6 +72,10 @@ setup_sandbox() {
   export FAKE_CODE_EXTENSIONS="$SANDBOX/code-extensions"
   : >"$FAKE_CODE_LOG"
   : >"$FAKE_CODE_EXTENSIONS"
+  export FAKE_MCP_LOG="$SANDBOX/mcp.log"
+  export FAKE_MCP_DIR="$SANDBOX/mcp"
+  : >"$FAKE_MCP_LOG"
+  mkdir -p "$FAKE_MCP_DIR"
   export PATH="$TESTS_DIR/fakes:$PATH"
   export NON_INTERACTIVE=1
   export DRY_RUN=0
@@ -86,6 +90,8 @@ load_libs() {
   . "$REPO_ROOT/lib/ui.sh"
   # shellcheck source=/dev/null
   . "$REPO_ROOT/lib/skills.sh"
+  # shellcheck source=/dev/null
+  . "$REPO_ROOT/lib/mcp.sh"
 }
 
 npx_log() { cat "$FAKE_NPX_LOG"; }

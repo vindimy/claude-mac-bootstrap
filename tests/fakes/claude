@@ -1,0 +1,3 @@
+#!/bin/bash
+# Fake agent CLI for tests — see tests/fakes/fake-mcp-cli.
+exec fake-mcp-cli claude "$@"
