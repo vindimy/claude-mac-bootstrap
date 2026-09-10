@@ -10,7 +10,7 @@ for t in tests/test_*.sh; do
 done
 if command -v shellcheck >/dev/null 2>&1; then
   # shellcheck disable=SC2086
-  shellcheck lib/*.sh apps/*.sh run.sh update.sh install.sh tests/lib.sh tests/run.sh tests/fakes/npx $tests || rc=1
+  shellcheck lib/*.sh apps/*.sh run.sh update.sh install.sh bin/github-mcp.sh tests/lib.sh tests/run.sh tests/fakes/npx tests/fakes/code tests/fakes/fake-mcp-cli tests/fakes/claude tests/fakes/codex tests/fakes/gemini $tests || rc=1
 else
   echo "warning: shellcheck not installed (brew install shellcheck) — skipping lint" >&2
 fi

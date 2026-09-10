@@ -53,5 +53,12 @@ cat_for() { local i; i="$(idx_of "$1")"; [ "$i" -ge 0 ] && printf '%s\n' "${APP_
 assert_ok "vscode discovered" has vscode
 assert_eq "Visual Studio Code" "$(app_name_for vscode)" "vscode name"
 assert_eq "Development" "$(cat_for vscode)" "vscode category"
+assert_ok "mcp-servers discovered" has mcp-servers
+assert_eq "AI" "$(cat_for mcp-servers)" "mcp-servers category"
+# apps load alphabetically; mcp-servers must come after the agent CLIs and before vscode
+assert_ok "gemini-cli before mcp-servers" test "$(idx_of gemini-cli)" -lt "$(idx_of mcp-servers)"
+assert_ok "codex before mcp-servers" test "$(idx_of codex)" -lt "$(idx_of mcp-servers)"
+assert_ok "claude-code before mcp-servers" test "$(idx_of claude-code)" -lt "$(idx_of mcp-servers)"
+assert_ok "mcp-servers before vscode" test "$(idx_of mcp-servers)" -lt "$(idx_of vscode)"
 
 finish
