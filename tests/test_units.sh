@@ -46,4 +46,12 @@ rm -f "$(skills_conf_file)"
 out="$(DRY_RUN=1 agent_skill_suites_install 2>/dev/null)"
 assert_contains "$out" "[dry-run] npx -y skills add obra/superpowers -g -y -a codex -s *" "superpowers dry-run add"
 assert_contains "$out" "[dry-run] npx -y skills add NeoLabHQ/context-engineering-kit -g -y -a claude-code codex gemini-cli -s context-engineering" "cek dry-run add"
+
+# vscode + mcp-servers units
+idx_of() { local i=0; while [ "$i" -lt "${#APP_IDS[@]}" ]; do if [ "${APP_IDS[$i]}" = "$1" ]; then printf '%s\n' "$i"; return; fi; i=$((i + 1)); done; printf -- '-1\n'; }
+cat_for() { local i; i="$(idx_of "$1")"; [ "$i" -ge 0 ] && printf '%s\n' "${APP_CATEGORIES[$i]}"; }
+assert_ok "vscode discovered" has vscode
+assert_eq "Visual Studio Code" "$(app_name_for vscode)" "vscode name"
+assert_eq "Development" "$(cat_for vscode)" "vscode category"
+
 finish
