@@ -192,7 +192,7 @@ mcp_apply_agent() {
   local agent="$1" rc=0 rec name state n i
   # Line-numbered iteration (not `while read`) so the CLI calls inside never
   # compete with the loop for stdin — same rule as lib/skills.sh.
-  n="$(mcp_roster_records | grep -c .)"
+  n="$(mcp_roster_records | grep -c .)" || n=0
   i=1
   while [ "$i" -le "$n" ]; do
     rec="$(mcp_roster_records | sed -n "${i}p")"

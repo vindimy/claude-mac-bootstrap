@@ -185,6 +185,21 @@ assert_contains "$out" "[dry-run] $HOME/.local/bin/claude mcp add -s user dry --
 assert_not_contains "$(mcp_log)" " mcp add " "dry-run calls no add"
 assert_fail "dry-run writes no state" mcp_state_get claude dry
 
+# all-comments roster: nothing to enable, but state entries are still dropped
+# as "removed from the roster" — and it must not abort under set -e (state at
+# this point holds context7 and new for all three agents).
+printf '# nothing enabled\n\n' >"$MCP_ROSTER_FILE"
+: >"$FAKE_MCP_LOG"
+( set -e; mcp_apply ); rc=$?
+assert_eq "0" "$rc" "all-comments roster is a no-op under set -e"
+assert_not_contains "$(mcp_log)" " mcp add " "all-comments roster adds nothing"
+assert_eq "6" "$(grep -c ' mcp remove ' "$FAKE_MCP_LOG")" "all-comments roster drops every recorded server"
+assert_fail "all-comments roster clears state" mcp_state_get claude new
+
+# restore the roster the remove_all block below expects, and repopulate state
+printf 'context7|stdio|npx -y @upstash/context7-mcp@latest\nnew|stdio|echo new\n' >"$MCP_ROSTER_FILE"
+mcp_apply
+
 # remove_all: every managed server gone, state file gone, user server kept
 printf 'context7|stdio|npx -y @upstash/context7-mcp@latest\nnew|stdio|echo new\n' >"$MCP_ROSTER_FILE"
 : >"$FAKE_MCP_LOG"
