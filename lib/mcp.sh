@@ -3,7 +3,7 @@
 # every installed agent CLI (Claude Code, Codex, Gemini CLI) through the
 # CLI's own `mcp add` / `mcp remove` in user scope, so the servers are there
 # in the terminal and in the agents' VS Code extensions alike. Sourced after
-# lib/drivers.sh by run.sh, update.sh and the tests. Pure functions; every
+# lib/skills.sh by run.sh, update.sh and the tests. Pure functions; every
 # mutation goes through run_cmd; nothing writes to stdout inside a function
 # whose output is captured.
 #

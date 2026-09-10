@@ -75,8 +75,11 @@ Verified 2026-09-10 on the primary machine:
 3. **Gemini joins the skills engine as `gemini-cli`.** No new selection
    prompts: the rosters already say `*` for agents, so the reconcile pass
    simply gains a third `-a` target. The gemini-cli unit creates
-   `~/.gemini/skills` on install so the agent counts as ready on the same
-   run. obra/superpowers stays Codex-only (it is a Claude Code plugin there).
+   `~/.gemini/skills` on install; because the skills units sort before
+   `gemini-cli`, a fresh machine links Gemini's skills on the run after the
+   CLI is first installed (the rule already applied to Codex), and an
+   existing machine on the same run. obra/superpowers stays Codex-only (it
+   is a Claude Code plugin there).
 4. **MCP servers are a repo roster applied through each CLI.** Editing
    `~/.claude.json`, `config.toml` and `settings.json` by hand would fight
    three different writers; each CLI's `mcp add` is the supported path and
@@ -145,7 +148,10 @@ once per extension.
 - `SKILLS_KNOWN_AGENTS="claude-code codex gemini-cli"`.
 - `gemini_cli_install` runs `mkdir -p ~/.gemini/skills` after the formula
   install (through `run_cmd`); `gemini_cli_uninstall` in zap mode removes
-  `~/.gemini`. Keep mode leaves it. No attempt is made to unlink skills when
+  `~/.gemini`. Keep mode leaves it. Because the skills units sort before
+  `gemini-cli`, a fresh machine links Gemini's skills on the run after the
+  CLI is first installed (the rule already applied to Codex), and an
+  existing machine on the same run. No attempt is made to unlink skills when
   the agent goes away: symlinks in a directory nobody reads are harmless, and
   a later `skills remove` for a name cleans them everywhere.
 - Roster comments in both skills units and the README sentence listing agent
@@ -289,7 +295,11 @@ Offline, under stock bash 3.2, through `tests/run.sh`:
 - `tests/test_units.sh`: `vscode`, `mcp-servers` discovered with the right
   categories; alphabetical position of `mcp-servers` between `gemini-cli`
   and `vscode` asserted, since Decision 5 depends on it.
-- Manual, on the primary machine after merge: `./run.sh --apps <current
-  selection>,vscode,mcp-servers`, then `claude mcp list`, `codex mcp list`,
-  `gemini mcp list`, `gemini skills list`, `code --list-extensions`, and one
-  `claude-context-audit.sh` run to record the payload delta.
+- Manual, on the primary machine after merge, in this order:
+  `./run.sh --apps <current selection>,vscode,mcp-servers`; then
+  `gemini mcp list` (both servers; check `~/.gemini/settings.json` stores the
+  command and args), `claude mcp list`, `codex mcp list`; `gemini skills list`
+  (empty until the next run on a fresh machine); `code --list-extensions`
+  (four ids); launch each VS Code extension once to confirm the GitHub
+  server starts under `gh auth token`; one `claude-context-audit.sh` run for
+  the payload delta.

@@ -215,7 +215,7 @@ vscode_ext_installed() {
     code="$(vscode_code_bin)" || return 1
     list="$("$code" --list-extensions 2>/dev/null | tr '[:upper:]' '[:lower:]')"
   fi
-  printf '%s\n' "$list" | grep -qx "$id"
+  printf '%s\n' "$list" | grep -Fqx "$id"
 }
 
 vscode_ext_install() {

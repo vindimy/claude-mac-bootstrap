@@ -175,9 +175,9 @@ docker context, so existing projects work unchanged:
   the `superpowers` plugin (its SessionStart hook is what makes it fire), and
   a link under `~/.claude/skills` would list every skill twice. Codex reads
   the shared store `~/.agents/skills` directly, so the CLI creates no links
-  for it — `~/.codex/skills` staying empty is expected. If `~/.codex` does
-  not exist yet (Codex not installed), the repo is skipped and installed on
-  the next update.
+  for it — `~/.codex/skills` staying empty is expected. If `~/.codex` or
+  `~/.gemini` does not exist yet (the agent not installed), the repo is
+  skipped for that agent and installed on the next update.
 - **mattpocock-skills plugin.** Replaced by the suites unit on 2026-09-08
   (the plugin was skills-only). On a machine that still has it:
   `claude plugin uninstall mattpocock-skills@claude-plugins-official`.
@@ -221,7 +221,11 @@ docker context, so existing projects work unchanged:
   individual tools with bare `mcp__<server>__<tool>` names in
   `permissions.deny` in `dotfiles/.claude/settings.json`.
 - **Name clash.** If an agent already has a server with a roster name that
-  this unit did not add, the unit logs it and leaves it alone.
+  this unit did not add, the unit logs it and leaves it alone. `claude mcp
+  get` and `codex mcp get` see every scope, so a same-named server in a
+  project or local scope of the directory `run.sh` runs from also counts as
+  a clash; remove it or rename it to let the unit manage the user-scope
+  copy.
 
 ## dropbox
 
@@ -265,9 +269,9 @@ docker context, so existing projects work unchanged:
   respectively). Skills and MCP servers need nothing extra — the extensions
   run the same CLIs against the same home directories.
 - **Ordering.** On a first run that also installs the agent CLIs, `vscode`
-  is applied last (units load alphabetically), so the extensions land on the
-  same run. If an agent is added later, its extension follows on the next
-  `./run.sh` / `./update.sh`.
+  is applied after the agent CLIs (units load alphabetically and `vscode`
+  sorts after them), so the extensions land on the same run. If an agent is
+  added later, its extension follows on the next `./run.sh` / `./update.sh`.
 - **Removal.** Deselecting an agent CLI leaves its extension in VS Code
   (uninstall it from the Extensions view). Deselecting `vscode` with zap
   removes `~/.vscode` and the app's user settings along with the app.
