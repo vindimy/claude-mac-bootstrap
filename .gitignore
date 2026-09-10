@@ -16,3 +16,6 @@ dotfiles/.claude/*
 
 # Claude Code per-machine permission overrides for this repo.
 .claude/settings.local.json
+
+# Local git worktrees (superpowers workflow); never committed.
+.worktrees/
