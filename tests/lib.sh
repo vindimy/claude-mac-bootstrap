@@ -68,6 +68,10 @@ setup_sandbox() {
   export FAKE_NPX_LOG="$SANDBOX/npx.log"
   : >"$FAKE_NPX_LOG"
   export FAKE_NPX_FIXTURES="$TESTS_DIR/fixtures"
+  export FAKE_CODE_LOG="$SANDBOX/code.log"
+  export FAKE_CODE_EXTENSIONS="$SANDBOX/code-extensions"
+  : >"$FAKE_CODE_LOG"
+  : >"$FAKE_CODE_EXTENSIONS"
   export PATH="$TESTS_DIR/fakes:$PATH"
   export NON_INTERACTIVE=1
   export DRY_RUN=0

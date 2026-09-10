@@ -1,0 +1,19 @@
+#!/bin/bash
+# Fake VS Code `code` CLI for tests. Logs each call (args as given) to
+# $FAKE_CODE_LOG and keeps the installed-extension list in
+# $FAKE_CODE_EXTENSIONS (one id per line, lowercased like the real CLI):
+#   --list-extensions        print the list
+#   --install-extension ID   append ID
+# FAKE_CODE_FAIL=1 makes --install-extension exit 1.
+set -u
+printf '%s\n' "$*" >>"${FAKE_CODE_LOG:?}"
+case "${1:-}" in
+  --list-extensions)
+    if [ -f "${FAKE_CODE_EXTENSIONS:?}" ]; then cat "$FAKE_CODE_EXTENSIONS"; fi
+    ;;
+  --install-extension)
+    if [ "${FAKE_CODE_FAIL:-0}" = 1 ]; then exit 1; fi
+    printf '%s\n' "$2" | tr '[:upper:]' '[:lower:]' >>"${FAKE_CODE_EXTENSIONS:?}"
+    ;;
+  *) echo "fake code: unsupported invocation: $*" >&2; exit 2 ;;
+esac

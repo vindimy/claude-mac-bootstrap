@@ -186,6 +186,47 @@ dmg_uninstall() {
   fi
 }
 
+# ---- VS Code extensions ------------------------------------------------------
+
+# The visual-studio-code cask links `code` into the brew prefix; a PATH without
+# Homebrew (GUI-launched shells) still has the copy inside the app bundle.
+vscode_code_bin() {
+  local b="/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
+  if command -v code >/dev/null 2>&1; then
+    command -v code
+    return 0
+  fi
+  if [ -x "$b" ]; then
+    printf '%s\n' "$b"
+    return 0
+  fi
+  return 1
+}
+
+# vscode_ext_installed id [list]: 0 when the extension is installed. `code
+# --list-extensions` prints ids lowercased; pass its (lowercased) output as
+# $2 to avoid one CLI call per id.
+vscode_ext_installed() {
+  local id list code
+  id="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  if [ -n "${2+x}" ]; then
+    list="$2"
+  else
+    code="$(vscode_code_bin)" || return 1
+    list="$("$code" --list-extensions 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+  fi
+  printf '%s\n' "$list" | grep -qx "$id"
+}
+
+vscode_ext_install() {
+  local code
+  if ! code="$(vscode_code_bin)"; then
+    err "VS Code: 'code' CLI not found — cannot install extension $1"
+    return 1
+  fi
+  run_cmd "$code" --install-extension "$1"
+}
+
 # ---- macOS preferences (`defaults`) ----------------------------------------
 # For settings units (hardening, performance) whose "install" is a set of
 # system/user preferences. Reads never need root; writes to /Library/... do,
