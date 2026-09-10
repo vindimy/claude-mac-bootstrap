@@ -46,6 +46,8 @@ case removals proceed without prompting and settings are kept.
 | `dotfiles/.zprofile` | `~/.zprofile` and `~/.profile` (symlinks) | Login-shell env for zsh and bash: Homebrew, PATH, Java/Android; triggers the daily dropbox-ignore-git sweep |
 | `bin/dropbox-ignore-git.sh` | `~/.local/bin/dropbox-ignore-git.sh` (symlink) | Marks every `.git` dir under `~/Library/CloudStorage/Dropbox` with `com.dropbox.ignored=1` so Dropbox sync can never corrupt a git index; no-ops on machines without a Dropbox folder |
 | `bin/claude-context-audit.sh` | `~/.local/bin/claude-context-audit.sh` (symlink) | Measures the hidden per-turn payload Claude Code sends the model (tool schemas, skills catalogue, system prompt) through a local logging proxy and keeps a history so growth is visible; see [Claude Code context audit](#claude-code-context-audit) |
+| `bin/github-mcp.sh` | `~/.local/bin/github-mcp.sh` (symlink) | Launcher for the GitHub MCP server in the `mcp-servers` roster: takes the token from `gh auth token` at start, so no token lives in any agent's config; limits the toolsets to repos, issues and pull requests (edit the script to widen) |
+| `dotfiles/mcp-servers.conf` | read in place by the `mcp-servers` unit | Managed MCP roster, one server per line (`name|transport|command-or-url`), applied to Claude Code, Codex and Gemini CLI in user scope through each CLI's own `mcp add`; see [MCP servers](docs/howto.md#mcp-servers) |
 | `bin/agent-proxy.mjs` | `~/.local/state/claude-context-audit/agent-proxy/proxy.mjs` (copy, refreshed by the audit script whenever it differs) | Matt Pocock's zero-dependency logging proxy, vendored at gist revision `e142f08f` (provenance in its header). Runs from the state dir so its `logs/` land there, never in the checkout |
 | `dotfiles/.claude/settings.json` | `~/.claude/settings.json` (copy, written by the `claude-code` unit on every install/update) | Global Claude Code settings: enabled plugins, tool deny list, skill visibility, feature flags. Lean profile from the 2026-09-05 system-prompt trim. The repo copy is authoritative: local edits (including ones Claude Code makes itself) are overwritten on the next run, so change the repo file instead. A copy rather than a symlink because Claude Code rewrites the file; `~/.claude` otherwise stays per-machine and is git-ignored apart from this file |
 | `dotfiles/.claude/statusline-command.sh` | `~/.claude/statusline-command.sh` (copy, written by the `claude-code` unit on every install/update) | Status line script that `settings.json` points at (`statusLine.command`): repo name, git branch, context-usage bar, model. Needs `jq` (ships with macOS 15+). Repo copy is authoritative, same as `settings.json` |
@@ -86,9 +88,11 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `gsd` | GSD skill suite (67 `gsd-*` skills) | npm `get-shit-done-cc` (installs Node if needed) |
 | `agent-skills` | Agent skills, curated task packs (6 repos: softaworks/agent-toolkit, composio, coreyhaines31/marketingskills, lyndonkl/claude, alirezarezvani/claude-skills, ComposioHQ/awesome-claude-skills) | skills.sh CLI (`npx skills`); per-repo checklist on first install, saved in `~/.mac-bootstrap/skills.conf`; roster in `apps/agent-skills.sh` |
 | `agent-skill-suites` | Agent skill suites (obra/superpowers for Codex only — no Claude Code duplicate, mattpocock/skills, open-gsd/gsd-pi, NeoLabHQ/context-engineering-kit) | skills.sh CLI; same checklist/selection model; `*` selections track upstream additions and removals; roster in `apps/agent-skill-suites.sh` |
+| `mcp-servers` | MCP servers (context7, GitHub) | roster `dotfiles/mcp-servers.conf` applied through `claude mcp add -s user`, `codex mcp add`, `gemini mcp add -s user`; brew formula `github-mcp-server`; needs `gh auth login` for the github entry; state in `~/.mac-bootstrap/mcp.conf`; deselect removes only the servers it added |
 | `codex` | Codex CLI | brew cask `codex` (binary release; brew-updated) |
 | `antigravity` | Google Antigravity | brew cask `antigravity` (self-updates) |
 | `sublime-text` | Sublime Text | brew cask `sublime-text` (self-updates) |
+| `vscode` | Visual Studio Code | brew cask `visual-studio-code` (self-updates); also installs the agent extensions for whichever of `claude-code` (anthropic.claude-code), `codex` (openai.chatgpt), `gemini-cli` (Gemini CLI Companion + Gemini Code Assist) is installed — they run the same CLIs against the same `~/.claude`, `~/.codex`, `~/.gemini`, so skills and MCP servers carry over; zap removes extensions and user settings |
 | `markviewer` | MarkViewer (markdown viewer) | brew cask `markviewer` (self-updates) |
 | `amneziavpn` | Amnezia VPN | brew cask `amneziavpn` (pkg installer; prompts for admin password) |
 | `whatsapp` | WhatsApp | brew cask `whatsapp` (self-updates) |
@@ -110,7 +114,9 @@ The agent-tooling units (`claude-plugins`, `gsd`, `agent-skills`,
 rosters over the skills.sh CLI: on first install `run.sh` shows one checklist
 per upstream repo (pre-checked with the roster defaults), saves the choice per
 machine in `~/.mac-bootstrap/skills.conf`, and reconciles the shared store
-`~/.agents/skills` against it — selected skills are (re)installed by name,
+`~/.agents/skills` against it, linking into `~/.claude/skills`,
+`~/.codex/skills` and `~/.gemini/skills` for whichever agents are installed —
+selected skills are (re)installed by name,
 deselected ones removed, using the CLI's own lock file as the record of what
 came from where. Later `run.sh` passes ask once per unit whether to reselect
 (Enter = no); `update.sh` never prompts. Checking every skill of a repo saves
@@ -169,7 +175,9 @@ self-updating are left to their own updaters unless missing.
   status line's context bar. Bare MCP tool names in `permissions.deny`
   (`mcp__<server>__<tool>`) strip those definitions too — the 2026-09-08 trim
   dropped context-mode's seven rarely used tools that way (21 → 13 tools,
-  input tokens −15%). Method and rationale:
+  input tokens −15%). The `mcp-servers` roster adds tools the same way (the
+  GitHub server is limited to three toolsets for that reason) — run the audit
+  after changing it. Method and rationale:
   [aihero.dev, "How To Kill The Bloat In Claude Code's System Prompt"](https://www.aihero.dev/how-to-kill-the-bloat-in-claude-codes-system-prompt).
 
 ## History

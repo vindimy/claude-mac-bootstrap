@@ -1,6 +1,6 @@
 # VS Code, Gemini Skills and Managed MCP Servers — Design
 
-**Status: approved 2026-09-10, not yet implemented.**
+**Status: implemented 2026-09-10** — plan in `docs/superpowers/plans/2026-09-10-vscode-agents-mcp.md`, engine in `lib/mcp.sh`, VS Code driver in `lib/drivers.sh`, tests in `tests/`.
 
 ## Goal
 

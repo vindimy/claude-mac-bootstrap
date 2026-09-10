@@ -13,11 +13,13 @@ per app (apps with nothing beyond "it installs" are omitted).
 - [claude-plugins](#claude-plugins)
 - [agent-skills / agent-skill-suites](#agent-skills--agent-skill-suites)
 - [gsd](#gsd)
+- [mcp-servers](#mcp-servers)
 - [dropbox](#dropbox)
 - [controld](#controld)
 - [little-snitch](#little-snitch)
 - [xcode](#xcode)
 - [android-studio](#android-studio)
+- [vscode](#vscode)
 - [adobe-cc](#adobe-cc)
 - [hardening](#hardening)
 - [performance](#performance)
@@ -153,8 +155,9 @@ docker context, so existing projects work unchanged:
 
 - Both units install through the skills.sh CLI (`npx -y skills`) into the
   shared store `~/.agents/skills`, linked into every detected agent
-  (`~/.claude/skills`, `~/.codex/skills`). Node is installed first if `npx`
-  is missing.
+  (`~/.claude/skills`, `~/.codex/skills`, `~/.gemini/skills` — Gemini CLI
+  reads it natively, `gemini skills list` shows what it sees). Node is
+  installed first if `npx` is missing.
 - **Choosing skills.** First install in an interactive `./run.sh` shows a
   checklist per repo: toggle numbers, `a` = all, `n` = none, Enter confirms.
   Checking every skill saves `*` ("track all": new upstream skills arrive on
@@ -196,6 +199,30 @@ docker context, so existing projects work unchanged:
 - For future updates prefer running the `gsd-update` skill inside Claude
   Code — it backs up custom files before GSD's clean-install step.
 
+## mcp-servers
+
+- **What it does.** Applies `dotfiles/mcp-servers.conf` to every installed
+  agent CLI in user scope: `claude mcp add -s user`, `codex mcp add`,
+  `gemini mcp add -s user`. Agents not installed yet are skipped and picked
+  up on the next `./update.sh`. What was applied is recorded per machine in
+  `~/.mac-bootstrap/mcp.conf`; only servers in that file are ever removed, so
+  anything you add yourself with the CLIs is left alone.
+- **Adding a server.** One line, `name|stdio|command args...` or
+  `name|http|url`; a leading `~/` is expanded. Commit, then `./update.sh`.
+  Editing a line re-applies it (remove + add); deleting a line removes the
+  server from every agent. Verify with `claude mcp list`, `codex mcp list`,
+  `gemini mcp list`.
+- **github.** `bin/github-mcp.sh` (linked into `~/.local/bin`) runs the
+  `github-mcp-server` formula with the token from `gh auth token`; run
+  `gh auth login` once. Toolsets are limited to `repos,issues,pull_requests`
+  — edit the `--toolsets` list in the script to widen.
+- **Context cost.** Every server's tools ride along in Claude Code's per-turn
+  payload. Run `claude-context-audit.sh` after a roster change; trim
+  individual tools with bare `mcp__<server>__<tool>` names in
+  `permissions.deny` in `dotfiles/.claude/settings.json`.
+- **Name clash.** If an agent already has a server with a roster name that
+  this unit did not add, the unit logs it and leaves it alone.
+
 ## dropbox
 
 - If install fails, enable the extension in System Settings → Privacy &
@@ -228,6 +255,22 @@ docker context, so existing projects work unchanged:
 - The SDK and emulators come from the IDE's first-launch wizard, not brew.
 - The managed `.zprofile` exports `ANDROID_HOME` preferring
   `~/Library/Android/sdk` once the SDK exists.
+
+## vscode
+
+- **Agent extensions.** Installed by the unit for whichever agent CLIs are
+  installed: `claude-code` → anthropic.claude-code, `codex` → openai.chatgpt,
+  `gemini-cli` → Gemini CLI Companion and Gemini Code Assist. Each extension
+  signs in on first use (Anthropic, ChatGPT and Google accounts
+  respectively). Skills and MCP servers need nothing extra — the extensions
+  run the same CLIs against the same home directories.
+- **Ordering.** On a first run that also installs the agent CLIs, `vscode`
+  is applied last (units load alphabetically), so the extensions land on the
+  same run. If an agent is added later, its extension follows on the next
+  `./run.sh` / `./update.sh`.
+- **Removal.** Deselecting an agent CLI leaves its extension in VS Code
+  (uninstall it from the Extensions view). Deselecting `vscode` with zap
+  removes `~/.vscode` and the app's user settings along with the app.
 
 ## adobe-cc
 
