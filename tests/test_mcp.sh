@@ -40,7 +40,7 @@ mcp_agent_add codex  "context7|stdio|npx -y @upstash/context7-mcp"
 mcp_agent_add gemini "context7|stdio|npx -y @upstash/context7-mcp"
 assert_contains "$(mcp_log)" "claude mcp add -s user context7 -- npx -y @upstash/context7-mcp" "claude stdio shape"
 assert_contains "$(mcp_log)" "codex mcp add context7 -- npx -y @upstash/context7-mcp" "codex stdio shape"
-assert_contains "$(mcp_log)" "gemini mcp add -s user context7 -- npx -y @upstash/context7-mcp" "gemini stdio shape"
+assert_contains "$(mcp_log)" "gemini mcp add -s user context7 npx -y @upstash/context7-mcp" "gemini stdio shape"
 mcp_agent_add claude "sentry|http|https://mcp.sentry.dev/mcp"
 mcp_agent_add codex  "sentry|http|https://mcp.sentry.dev/mcp"
 mcp_agent_add gemini "sentry|http|https://mcp.sentry.dev/mcp"
@@ -48,8 +48,9 @@ assert_contains "$(mcp_log)" "claude mcp add -s user --transport http sentry htt
 assert_contains "$(mcp_log)" "codex mcp add sentry --url https://mcp.sentry.dev/mcp" "codex http shape"
 assert_contains "$(mcp_log)" "gemini mcp add -s user -t http sentry https://mcp.sentry.dev/mcp" "gemini http shape"
 mcp_agent_add gemini "gh|stdio|~/.local/bin/github-mcp.sh"
-assert_contains "$(mcp_log)" "gemini mcp add -s user gh -- $HOME/.local/bin/github-mcp.sh" "target expanded when adding"
+assert_contains "$(mcp_log)" "gemini mcp add -s user gh $HOME/.local/bin/github-mcp.sh" "target expanded when adding"
 assert_fail "unknown transport rejected" mcp_agent_add claude "x|sse|y"
+assert_fail "fake gemini rejects --" gemini mcp add -s user bad -- echo x
 
 # ---- detection ----
 assert_ok "claude has (mcp get)" mcp_agent_has claude context7

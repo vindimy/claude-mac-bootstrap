@@ -117,7 +117,7 @@ mcp_agent_add() {
     claude:http)  run_cmd "$cli" mcp add -s user --transport http "$name" "$target" ;;
     codex:stdio)  run_cmd "$cli" mcp add "$name" -- $target ;;
     codex:http)   run_cmd "$cli" mcp add "$name" --url "$target" ;;
-    gemini:stdio) run_cmd "$cli" mcp add -s user "$name" -- $target ;;
+    gemini:stdio) run_cmd "$cli" mcp add -s user "$name" $target ;;
     gemini:http)  run_cmd "$cli" mcp add -s user -t http "$name" "$target" ;;
     *)
       err "mcp: unsupported agent/transport '$agent/$transport' for '$name'"

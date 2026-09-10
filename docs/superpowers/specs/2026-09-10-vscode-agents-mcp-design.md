@@ -46,6 +46,10 @@ Verified 2026-09-10 on the primary machine:
   | codex | `codex mcp add NAME -- CMD ARGS` | `codex mcp add NAME --url URL` | `codex mcp get NAME` (rc 1 if missing) | `codex mcp remove NAME` | `~/.codex/config.toml` |
   | gemini | `gemini mcp add -s user NAME CMD ARGS` | `gemini mcp add -s user -t http NAME URL` | no `get`; read `mcpServers` in the JSON | `gemini mcp remove -s user NAME` | `~/.gemini/settings.json` |
 
+  Verified 2026-09-10 against the real Gemini CLI (0.46.0): unlike Claude and
+  Codex, its stdio `mcp add` takes no `--` before the command — passing one
+  fails with "Not enough non-option arguments".
+
 - The GitHub MCP server is available as brew formula `github-mcp-server`
   (1.12.1). It reads `GITHUB_PERSONAL_ACCESS_TOKEN` and accepts `--toolsets`
   to limit the tools it exposes. The full server exposes 40+ tools, each of
