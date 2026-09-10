@@ -24,6 +24,7 @@ assert_ok "valid record" mcp_record_valid "$rec"
 assert_fail "bad name" mcp_record_valid "bad name|stdio|x"
 assert_fail "bad transport" mcp_record_valid "x|sse|x"
 assert_fail "empty target" mcp_record_valid "x|stdio|"
+assert_fail "tab in record rejected" mcp_record_valid "$(printf 'x|stdio|echo\ta')"
 MCP_ROSTER_FILE="$SANDBOX/missing.conf"
 assert_fail "missing roster -> rc 1" mcp_roster_records
 MCP_ROSTER_FILE="$SANDBOX/roster.conf"
@@ -88,6 +89,12 @@ assert_fail "state deleted" mcp_state_get codex context7
 assert_eq "1" "$(state | wc -l | tr -d ' ')" "one line left"
 mcp_state_delete codex github
 assert_eq "0" "$(state | wc -l | tr -d ' ')" "state empty"
+# the state file now holds only the header; the rewrite pipeline must not
+# propagate `grep -v`'s rc 1 (no non-comment lines to match) under pipefail
+( set -e -o pipefail; mcp_state_put codex again "again|stdio|x" ); rc=$?
+assert_eq "0" "$rc" "state rewrite on header-only file survives pipefail"
+assert_ok "state readable after pipefail-safe put" mcp_state_get codex again
+mcp_state_delete codex again
 
 # ---- apply: first run adds everything and records it ----
 printf 'context7|stdio|npx -y @upstash/context7-mcp\ngithub|stdio|~/.local/bin/github-mcp.sh\n' >"$MCP_ROSTER_FILE"

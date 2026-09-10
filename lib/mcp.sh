@@ -54,6 +54,9 @@ mcp_record_valid() {
     stdio | http) ;;
     *) return 1 ;;
   esac
+  case "$1" in
+    *"	"*) return 1 ;; # a literal tab: $(printf '\t') would corrupt the TSV state
+  esac
   [ -n "$target" ]
 }
 
@@ -137,8 +140,9 @@ mcp_agent_remove() {
 }
 
 # ---- state: $CONFIG_DIR/mcp.conf --------------------------------------------
-# TSV: agent<TAB>name<TAB>record. Names never contain tabs (validated), so a
-# record round-trips byte for byte. Not written under --dry-run.
+# TSV: agent<TAB>name<TAB>record. Roster records are validated to contain no
+# tabs (mcp_record_valid), so a record round-trips byte for byte. Not written
+# under --dry-run.
 
 mcp_state_file() { printf '%s/mcp.conf\n' "$CONFIG_DIR"; }
 
@@ -166,7 +170,7 @@ mcp_state_write() { # agent name record put|delete
   {
     printf '# Managed by run.sh — MCP servers applied per agent (agent, name, roster record).\n'
     if [ -f "$f" ]; then
-      grep -v '^#' "$f" | awk -F'\t' -v a="$1" -v n="$2" '!($1 == a && $2 == n)'
+      { grep -v '^#' "$f" || true; } | awk -F'\t' -v a="$1" -v n="$2" '!($1 == a && $2 == n)'
     fi
     if [ "$4" = put ]; then printf '%s\t%s\t%s\n' "$1" "$2" "$3"; fi
   } >"$tmp"
