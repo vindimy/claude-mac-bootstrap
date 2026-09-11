@@ -264,10 +264,22 @@ docker context, so existing projects work unchanged:
 
 - **Agent extensions.** Installed by the unit for whichever agent CLIs are
   installed: `claude-code` → anthropic.claude-code, `codex` → openai.chatgpt,
-  `gemini-cli` → Gemini CLI Companion and Gemini Code Assist. Each extension
+  `gemini-cli` → Gemini CLI Companion. Each extension
   signs in on first use (Anthropic, ChatGPT and Google accounts
   respectively). Skills and MCP servers need nothing extra — the extensions
   run the same CLIs against the same home directories.
+- **Where they appear.** Claude Code and Codex register a view in the
+  secondary (right) side bar, so they show as tabs there. Gemini CLI
+  Companion contributes no panel at all, only commands such as `Gemini CLI:
+  Run`, which opens Gemini CLI in a terminal with editor context. A missing
+  Gemini tab on the right is therefore expected, not a failed install.
+- **Gemini Code Assist is not installed.** Its VS Code client
+  (google.geminicodeassist) stopped serving individual Google accounts in
+  September 2026 — it answers sign-in with "no longer supported for Gemini
+  Code Assist for individuals" and points at Antigravity — so only enterprise
+  sign-ins would get anything from it. The unit no longer installs it. If an
+  earlier run left it behind, remove it with
+  `code --uninstall-extension google.geminicodeassist`.
 - **Ordering.** On a first run that also installs the agent CLIs, `vscode`
   is applied after the agent CLIs (units load alphabetically and `vscode`
   sorts after them), so the extensions land on the same run. If an agent is

@@ -16,15 +16,16 @@ assert_fail "cached list is authoritative" vscode_ext_installed anthropic.claude
 vscode_ext_install openai.chatgpt
 assert_contains "$(code_log)" "--install-extension openai.chatgpt" "install calls the CLI"
 assert_ok "installed after install" vscode_ext_installed openai.chatgpt
-out="$(DRY_RUN=1 vscode_ext_install google.geminicodeassist)"
-assert_contains "$out" "[dry-run] $TESTS_DIR/fakes/code --install-extension google.geminicodeassist" "dry-run install prints"
-assert_fail "dry-run did not install" vscode_ext_installed google.geminicodeassist
+out="$(DRY_RUN=1 vscode_ext_install google.gemini-cli-vscode-ide-companion)"
+assert_contains "$out" "[dry-run] $TESTS_DIR/fakes/code --install-extension google.gemini-cli-vscode-ide-companion" "dry-run install prints"
+assert_fail "dry-run did not install" vscode_ext_installed google.gemini-cli-vscode-ide-companion
 
 # ---- unit: mapping ----
 assert_eq "3" "$(printf '%s\n' "$VSCODE_AGENT_EXTENSIONS" | grep -c '|')" "three agents mapped"
 assert_contains "$VSCODE_AGENT_EXTENSIONS" "claude-code|anthropic.claude-code" "claude mapping"
 assert_contains "$VSCODE_AGENT_EXTENSIONS" "codex|openai.chatgpt" "codex mapping"
-assert_contains "$VSCODE_AGENT_EXTENSIONS" "gemini-cli|google.gemini-cli-vscode-ide-companion google.geminicodeassist" "gemini gets both extensions"
+assert_contains "$VSCODE_AGENT_EXTENSIONS" "gemini-cli|google.gemini-cli-vscode-ide-companion" "gemini mapping"
+assert_not_contains "$VSCODE_AGENT_EXTENSIONS" "geminicodeassist" "Gemini Code Assist is not on the roster (individual accounts unsupported)"
 
 # ---- unit: apply installs only for installed agents ----
 claude_code_installed() { return 0; }
@@ -36,7 +37,7 @@ assert_ok "apply succeeds" vscode_extensions_apply
 assert_contains "$(code_log)" "--install-extension anthropic.claude-code" "claude ext installed"
 assert_not_contains "$(code_log)" "openai.chatgpt" "codex not installed -> no ext"
 assert_contains "$(code_log)" "--install-extension google.gemini-cli-vscode-ide-companion" "gemini companion installed"
-assert_contains "$(code_log)" "--install-extension google.geminicodeassist" "gemini code assist installed"
+assert_not_contains "$(code_log)" "geminicodeassist" "gemini code assist never installed"
 assert_eq "1" "$(grep -c -- '--list-extensions' "$FAKE_CODE_LOG")" "listing read once per pass"
 
 # second pass: everything present, nothing installed
@@ -49,7 +50,7 @@ assert_not_contains "$(code_log)" "--install-extension" "present extensions not 
 : >"$FAKE_CODE_LOG"
 export FAKE_CODE_FAIL=1
 assert_fail "failed install returns 1" vscode_extensions_apply
-assert_eq "3" "$(grep -c -- '--install-extension' "$FAKE_CODE_LOG")" "keeps going after a failure"
+assert_eq "2" "$(grep -c -- '--install-extension' "$FAKE_CODE_LOG")" "keeps going after a failure"
 unset FAKE_CODE_FAIL
 
 # dry-run prints the installs and changes nothing

@@ -92,7 +92,7 @@ Per-app operational notes — post-install steps, gotchas, recovery — live in
 | `codex` | Codex CLI | brew cask `codex` (binary release; brew-updated) |
 | `antigravity` | Google Antigravity | brew cask `antigravity` (self-updates) |
 | `sublime-text` | Sublime Text | brew cask `sublime-text` (self-updates) |
-| `vscode` | Visual Studio Code | brew cask `visual-studio-code` (self-updates); also installs the agent extensions for whichever of `claude-code` (anthropic.claude-code), `codex` (openai.chatgpt), `gemini-cli` (Gemini CLI Companion + Gemini Code Assist) is installed — they run the same CLIs against the same `~/.claude`, `~/.codex`, `~/.gemini`, so skills and MCP servers carry over; zap removes extensions and user settings |
+| `vscode` | Visual Studio Code | brew cask `visual-studio-code` (self-updates); also installs the agent extensions for whichever of `claude-code` (anthropic.claude-code), `codex` (openai.chatgpt), `gemini-cli` (Gemini CLI Companion) is installed — they run the same CLIs against the same `~/.claude`, `~/.codex`, `~/.gemini`, so skills and MCP servers carry over. Claude Code and Codex open as tabs in the secondary (right) side bar; Gemini CLI Companion adds only commands (`Gemini CLI: Run`), no panel. Gemini Code Assist is deliberately left out: its VS Code client no longer serves individual accounts (enterprise only); zap removes extensions and user settings |
 | `markviewer` | MarkViewer (markdown viewer) | brew cask `markviewer` (self-updates) |
 | `amneziavpn` | Amnezia VPN | brew cask `amneziavpn` (pkg installer; prompts for admin password) |
 | `whatsapp` | WhatsApp | brew cask `whatsapp` (self-updates) |

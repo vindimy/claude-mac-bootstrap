@@ -7,15 +7,19 @@
 # against the same ~/.claude, ~/.codex or ~/.gemini. Extensions update
 # themselves inside VS Code; the pass here only fills gaps, on every
 # install/update. Deselecting an agent later leaves its extension in place.
+# Gemini Code Assist (google.geminicodeassist) is deliberately not on the
+# roster: since 2026-09 its VS Code client refuses individual accounts
+# ("no longer supported for Gemini Code Assist for individuals", pointing at
+# Antigravity), so only enterprise sign-ins would get anything from it.
 APP_NAME="Visual Studio Code"
 APP_CATEGORY="Development"
-APP_NOTE="Agent extensions (Claude Code, Codex, Gemini CLI Companion + Gemini Code Assist) are installed for whichever of claude-code, codex, gemini-cli is installed; each needs its own sign-in on first use. Deselecting an agent leaves its extension in place. zap removes ~/.vscode (all extensions) and VS Code's user settings."
+APP_NOTE="Agent extensions (Claude Code, Codex, Gemini CLI Companion) are installed for whichever of claude-code, codex, gemini-cli is installed; each needs its own sign-in on first use. Deselecting an agent leaves its extension in place. zap removes ~/.vscode (all extensions) and VS Code's user settings."
 
 # agent-unit-id|extension ids (space-separated). Unit ids are the apps/*.sh
 # names; <unit>_installed decides whether the extensions are wanted.
 VSCODE_AGENT_EXTENSIONS="claude-code|anthropic.claude-code
 codex|openai.chatgpt
-gemini-cli|google.gemini-cli-vscode-ide-companion google.geminicodeassist"
+gemini-cli|google.gemini-cli-vscode-ide-companion"
 
 # Install the missing extensions for every agent whose unit reports
 # installed. Keeps going after a failure and returns 1 at the end if any
