@@ -145,7 +145,7 @@ Everything the automation records about one machine: the selection, saved choice
 _Avoid_: local config, repo config, host config
 
 **Sweep**:
-The daily pass that marks every git directory under Dropbox as ignored by Dropbox sync, so sync can never corrupt a git index.
+The daily pass that marks every git directory and every rebuildable build or dependency directory under Dropbox as ignored by Dropbox sync, so sync can never corrupt a git index or churn on generated trees.
 _Avoid_: cron job, cleanup
 
 ### Claude Code payload

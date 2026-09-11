@@ -44,7 +44,7 @@ case removals proceed without prompting and settings are kept.
 | Repo file | Installed at | Purpose |
 |---|---|---|
 | `dotfiles/.zprofile` | `~/.zprofile` and `~/.profile` (symlinks) | Login-shell env for zsh and bash: Homebrew, PATH, Java/Android; triggers the daily dropbox-ignore-git sweep |
-| `bin/dropbox-ignore-git.sh` | `~/.local/bin/dropbox-ignore-git.sh` (symlink) | Marks every `.git` dir under `~/Library/CloudStorage/Dropbox` with `com.dropbox.ignored=1` so Dropbox sync can never corrupt a git index; no-ops on machines without a Dropbox folder |
+| `bin/dropbox-ignore-git.sh` | `~/.local/bin/dropbox-ignore-git.sh` (symlink) | Marks every `.git` dir and every rebuildable build/dependency dir (`node_modules`, `.wrangler`, `.venv`, `Pods`, `DerivedData`, `.gradle`, …; `build`/`dist`/`out`/`target`/`coverage` only beside a project manifest) under `~/Library/CloudStorage/Dropbox` with `com.dropbox.ignored=1` so Dropbox sync can never corrupt a git index or churn on generated trees; no-ops on machines without a Dropbox folder |
 | `bin/claude-context-audit.sh` | `~/.local/bin/claude-context-audit.sh` (symlink) | Measures the hidden per-turn payload Claude Code sends the model (tool schemas, skills catalogue, system prompt) through a local logging proxy and keeps a history so growth is visible; see [Claude Code context audit](#claude-code-context-audit) |
 | `bin/github-mcp.sh` | `~/.local/bin/github-mcp.sh` (symlink) | Launcher for the GitHub MCP server in the `mcp-servers` roster: takes the token from `gh auth token` at start, so no token lives in any agent's config; limits the toolsets to repos, issues and pull requests (edit the script to widen) |
 | `dotfiles/mcp-servers.conf` | read in place by the `mcp-servers` unit | Managed MCP roster, one server per line (`name\|transport\|command-or-url`), applied to Claude Code, Codex and Gemini CLI in user scope through each CLI's own `mcp add`; see [MCP servers](docs/howto.md#mcp-servers) |
@@ -137,6 +137,24 @@ self-updating are left to their own updaters unless missing.
 
 - **Why:** Dropbox treats `.git` internals as ordinary files and can roll back
   `.git/index` mid-session, silently corrupting commits (bit us 2026-08-01).
+  Build and dependency trees (`node_modules`, `.wrangler`, `.venv`, `Pods`,
+  Gradle and Xcode output, …) are the same kind of hazard in slow motion:
+  thousands of churning files that waste quota, bandwidth and sync time, and
+  that every machine regenerates anyway. Since 2026-09-10 the sweep flags
+  those too.
+- **What it flags:** two lists in the script. Names that only ever mean
+  "generated" (`.git`, `node_modules`, `.wrangler`, `.venv`, `venv`,
+  `__pycache__`, `.gradle`, `DerivedData`, `Pods`, `.next`, `.turbo`,
+  `.cache`, …) are flagged wherever they appear. Generic names (`build`,
+  `dist`, `out`, `target`, `coverage`) are flagged only when a project
+  manifest (`package.json`, `build.gradle`, `Podfile`, `wrangler.toml`,
+  `pyproject.toml`, `Cargo.toml`, …) sits in the parent directory, so a
+  `Books/build/` folder of real documents is never touched. Add a name to
+  `ALWAYS`, `GENERIC` or `MARKERS` to extend it; `tests/test_dropbox_ignore.sh`
+  pins the rules.
+- **Effect of the flag:** Dropbox keeps a flagged dir on this machine but
+  drops it from dropbox.com and other devices — exactly right for generated
+  trees, so never add a name that can hold hand-made files.
 - **How it runs:** triggered from `.zprofile` on login shells, throttled to once per
   24h via stamp file `~/.local/state/dropbox-ignore-git.stamp`, logging to
   `~/Library/Logs/dropbox-ignore-git.log`.

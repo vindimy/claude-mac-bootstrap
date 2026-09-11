@@ -235,6 +235,13 @@ docker context, so existing projects work unchanged:
   (selective sync) are manual and machine-local.
 - The repo itself is distributed by `git clone`, not Dropbox sync — never
   depend on Dropbox for repo state on a new machine.
+- `.git` dirs and build/dependency dirs (`node_modules`, `.wrangler`, `.venv`,
+  `Pods`, Gradle/Xcode output, …) under the Dropbox folder are excluded from
+  sync by the daily `dropbox-ignore-git` sweep (see README). To apply it right
+  away, e.g. after cloning a project or `npm install`, run
+  `~/.local/bin/dropbox-ignore-git.sh`; it prints only the dirs it newly
+  flagged. A flagged dir stays on this machine but is removed from
+  dropbox.com and other devices, so `npm install` there as usual.
 
 ## controld
 

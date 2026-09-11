@@ -29,7 +29,8 @@ elif [ -d /opt/homebrew/share/android-commandlinetools ]; then
   export PATH="$ANDROID_HOME/platform-tools:$PATH"
 fi
 
-# Daily sweep: keep Dropbox from syncing .git dirs (prevents git index corruption).
+# Daily sweep: keep Dropbox from syncing .git dirs (prevents git index corruption)
+# and build/dependency dirs such as node_modules (prevents sync churn).
 # Runs at most once per 24h, in the background. Real script lives in this repo
 # (bin/dropbox-ignore-git.sh); install.sh symlinks it into ~/.local/bin. The sweep
 # no-ops on machines without a Dropbox folder, so nothing here assumes Dropbox.
