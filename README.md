@@ -62,6 +62,10 @@ repo is migrated there automatically.)
 Per-app operational notes — post-install steps, gotchas, recovery — live in
 [docs/howto.md](docs/howto.md).
 
+Setting up the Claude Code and Codex VS Code extensions on a **Windows**
+machine behind a corporate proxy or VPN is a manual procedure, not a unit;
+see [docs/windows-vscode-claude-codex.md](docs/windows-vscode-claude-codex.md).
+
 | App id | App | How |
 |---|---|---|
 | `chrome` | Google Chrome | vendor dmg from dl.google.com (self-updates); brew cask dropped |
