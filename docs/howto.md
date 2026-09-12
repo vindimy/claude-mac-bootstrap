@@ -40,6 +40,13 @@ per app (apps with nothing beyond "it installs" are omitted).
   the retry only runs after you confirm, never under `--non-interactive`.
 - On a fresh machine the Xcode CLT GUI installer window can open **behind**
   the Terminal window — move Terminal if the install seems stalled.
+- `curl ... | bash` reattaches the terminal so the checklist can read
+  answers. It reattaches through the terminal's real device (`/dev/ttysNNN`),
+  never `/dev/tty`: Bun cannot kqueue-poll a freshly opened `/dev/tty`, so a
+  child inheriting one dies with `EINVAL: invalid argument, kqueue ... at
+  pull`. That killed every `claude` call a unit made. If an old checkout
+  still shows this, re-run from a clone (`~/.mac-bootstrap/repo/run.sh`)
+  rather than piping, or re-run just the affected unit afterwards.
 
 ## colima
 

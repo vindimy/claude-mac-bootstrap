@@ -60,7 +60,16 @@ if [ ! -f "$REPO_ROOT/lib/common.sh" ]; then
   fi
   # Under `curl | bash` stdin is the pipe; reattach the terminal (when one
   # can actually be opened) so the interactive checklist can read answers.
+  # Reattach through the terminal's real device path, never a /dev/tty clone
+  # — see tty_device() for the Bun kqueue crash that inheriting one causes.
   if [ ! -t 0 ] && { : </dev/tty; } 2>/dev/null; then
+    # shellcheck source=lib/tty.sh
+    . "$REPO_DIR/lib/tty.sh"
+    if tty_device; then
+      exec "$REPO_DIR/run.sh" ${1+"$@"} <"$TTY_DEV"
+    fi
+    # No resolvable device: a checklist that can read answers still beats
+    # dropping to non-interactive, so fall back to the clone.
     exec "$REPO_DIR/run.sh" ${1+"$@"} </dev/tty
   fi
   exec "$REPO_DIR/run.sh" ${1+"$@"}
