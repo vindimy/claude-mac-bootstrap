@@ -88,7 +88,7 @@ see [docs/windows-vscode-claude-codex.md](docs/windows-vscode-claude-codex.md).
 | `xcode` | Xcode (iOS builds) | Mac App Store via brew formula `mas`; needs App Store sign-in, accepts license + first-launch setup (sudo) |
 | `fastlane` | fastlane | brew formula `fastlane`; iOS/Android build + release automation |
 | `android-studio` | Android Studio | brew cask `android-studio` (self-updates); SDK via first-launch wizard, `.zprofile` exports `ANDROID_HOME` when the SDK exists |
-| `claude-plugins` | Claude Code plugins (11 from 9 marketplaces) | `claude plugin` CLI; needs `claude-code` |
+| `claude-plugins` | Claude Code plugins (11 from 9 marketplaces) | `claude plugin` CLI; needs `claude-code`; a CLI that cannot answer aborts the update instead of reinstalling |
 | `gsd` | GSD skill suite (67 `gsd-*` skills) | npm `get-shit-done-cc` (installs Node if needed) |
 | `agent-skills` | Agent skills, curated task packs (6 repos: softaworks/agent-toolkit, composio, coreyhaines31/marketingskills, lyndonkl/claude, alirezarezvani/claude-skills, ComposioHQ/awesome-claude-skills) | skills.sh CLI (`npx skills`); per-repo checklist on first install, saved in `~/.mac-bootstrap/skills.conf`; roster in `apps/agent-skills.sh` |
 | `agent-skill-suites` | Agent skill suites (obra/superpowers for Codex only — no Claude Code duplicate, mattpocock/skills, open-gsd/gsd-pi, NeoLabHQ/context-engineering-kit) | skills.sh CLI; same checklist/selection model; `*` selections track upstream additions and removals; roster in `apps/agent-skill-suites.sh` |

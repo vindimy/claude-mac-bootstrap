@@ -157,6 +157,13 @@ docker context, so existing projects work unchanged:
   `claude plugin`.
 - Restart Claude Code (new session) after installing or updating plugins —
   a running session does not pick them up.
+- `EINVAL: invalid argument, kqueue ... at pull` from every `claude plugin`
+  call is not a plugin fault — it is the inherited-`/dev/tty` bug described
+  under [General: running the bootstrap](#general-running-the-bootstrap).
+- An update that cannot read `claude plugin list` stops with "refusing to
+  reinstall on a guess" and leaves the CLI's own error on screen. A `claude`
+  that fails to run is not the same as an empty install, so the unit will not
+  reinstall the whole roster over it; fix the CLI and re-run.
 
 ## agent-skills / agent-skill-suites
 

@@ -56,9 +56,16 @@ claude_plugins_install() {
 }
 
 claude_plugins_update() {
-  local p
+  local p rc
   if ! claude_plugins_require_cli; then return 1; fi
-  if ! claude_plugins_installed && [ "$DRY_RUN" != 1 ]; then
+  # `|| rc=$?` keeps the call in a condition context so errexit stays off.
+  rc=0
+  claude_plugins_installed || rc=$?
+  if [ "$rc" = 2 ]; then
+    err "claude-plugins: 'claude plugin list' failed — refusing to reinstall on a guess. Fix the claude CLI (its error is above) and re-run."
+    return 1
+  fi
+  if [ "$rc" != 0 ] && [ "$DRY_RUN" != 1 ]; then
     claude_plugins_install
     return
   fi
@@ -86,10 +93,18 @@ claude_plugins_uninstall() {
   done
 }
 
+# claude_plugins_installed -> 0 every roster plugin is installed
+#                             1 the CLI answered, but some are missing
+#                             2 the CLI failed, so the state is unknown
+# The 1/2 split is load-bearing: a `claude` that cannot run at all used to
+# read as "nothing installed", which turned an update into a reinstall and
+# buried the real error (see the kqueue note in docs/howto.md). `claude
+# plugin list` keeps its stderr for the same reason — its diagnostics belong
+# in the run log, not in /dev/null.
 claude_plugins_installed() {
   local p list
-  claude_plugins_require_cli 2>/dev/null || return 1
-  list="$(claude plugin list 2>/dev/null)" || return 1
+  claude_plugins_require_cli 2>/dev/null || return 2
+  list="$(claude plugin list)" || return 2
   # shellcheck disable=SC2086
   for p in $CLAUDE_PLUGINS; do
     case "$list" in
