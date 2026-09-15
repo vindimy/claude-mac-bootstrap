@@ -4,7 +4,37 @@
 
 # ---- Homebrew cask ----------------------------------------------------------
 
-cask_installed() { brew list --cask "$1" >/dev/null 2>&1; }
+# Homebrew's receipt outlives the app: drag WhatsApp.app to the Trash and
+# `brew list --cask whatsapp` still reports it installed, so every later update
+# pass skips it and the app never comes back. Brew stages each artifact in the
+# Caskroom as a symlink to wherever it installed it, and `brew list --cask`
+# prints those paths, so a link that no longer resolves means the artifact was
+# removed by hand. Nothing app-specific is hardcoded; casks that stage no
+# symlink (pkg installers) are judged by the receipt alone, as before.
+#
+# cask_state name -> absent (no receipt) | orphaned (receipt, artifact gone)
+#                    | present
+cask_state() {
+  local listing path
+  listing="$(brew list --cask "$1" 2>/dev/null)" || {
+    printf 'absent\n'
+    return 0
+  }
+  # Fed by a redirect, not a pipe, so `return` leaves the function.
+  while IFS= read -r path; do
+    if [ -L "$path" ] && [ ! -e "$path" ]; then
+      printf 'orphaned\n'
+      return 0
+    fi
+  done <<EOF
+$listing
+EOF
+  printf 'present\n'
+}
+
+# True only when the app is really on disk. An orphaned receipt counts as not
+# installed, so cask_update routes it back through cask_install.
+cask_installed() { [ "$(cask_state "$1")" = present ]; }
 
 # --adopt takes over an app the user already installed manually, but only
 # when it is identical to the cask's copy. Self-updating apps usually drift
@@ -13,6 +43,13 @@ cask_installed() { brew list --cask "$1" >/dev/null 2>&1; }
 # app's own updater brings it current afterward. Under --dry-run, run_cmd
 # returns 0, so only the adopt line is printed.
 cask_install() {
+  # A surviving receipt makes `brew install` a no-op ("already installed"),
+  # which would leave the deleted app deleted; only reinstall re-stages it.
+  if [ "$(cask_state "$1")" = orphaned ]; then
+    warn "$1: brew still records it as installed but the installed app is gone (deleted by hand?) — reinstalling"
+    run_cmd brew reinstall --cask "$1"
+    return
+  fi
   if ! run_cmd brew install --cask --adopt "$1"; then
     warn "$1: existing app differs from the cask — replacing it with the brew-managed copy (settings preserved)"
     run_cmd brew install --cask --force "$1"
@@ -42,7 +79,9 @@ cask_update() {
 # run_cmd returns 0, so only the plain uninstall line is printed.
 cask_uninstall() {
   local name="$1" mode="${2:-keep}"
-  if ! cask_installed "$name"; then
+  # Receipt-based, not cask_installed: an orphaned cask has a receipt and a
+  # Caskroom dir to clear even though its app is already gone.
+  if [ "$(cask_state "$name")" = absent ]; then
     log "$name: not installed via brew, nothing to remove"
     return 0
   fi

@@ -135,7 +135,10 @@ Grok has no official macOS app (no cask, no Mac App Store app, no dmg as of
 nothing else to register. Apps without an `APP_CATEGORY` group under "Other".
 
 `update.sh` updates Homebrew plus only the selected apps; casks marked
-self-updating are left to their own updaters unless missing.
+self-updating are left to their own updaters unless missing. Deleting a
+managed app by hand counts as missing: Homebrew's receipt survives the
+deletion, so cask units judge an app present only when the artifact staged in
+the Caskroom still resolves, and reinstall it on the next run when it does not.
 
 ## dropbox-ignore-git sweep
 

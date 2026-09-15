@@ -1,0 +1,45 @@
+#!/bin/bash
+# Fake Homebrew for tests. Logs every call (args as given) to $FAKE_BREW_LOG
+# and answers queries from a fake Caskroom at $FAKE_BREW_CASKROOM — one dir
+# per cask, laid out like the real one, where a staged artifact is a symlink
+# to wherever the cask installed it:
+#   list --cask NAME       print the cask's files; exit 1 when it has no dir
+#   outdated --cask NAME   exit 1 when NAME appears in $FAKE_BREW_OUTDATED
+#   install|reinstall|upgrade|uninstall
+#                          log only; exit 1 when the verb is in $FAKE_BREW_FAIL
+set -u
+printf '%s\n' "$*" >>"${FAKE_BREW_LOG:?}"
+verb="${1:-}"
+shift 2>/dev/null || true
+name=""
+for arg in "$@"; do
+  case "$arg" in
+    -*) ;;
+    *) name="$arg" ;;
+  esac
+done
+case "$verb" in
+  list)
+    [ -n "$name" ] || exit 0
+    dir="${FAKE_BREW_CASKROOM:?}/$name"
+    [ -d "$dir" ] || exit 1
+    # -P (the default): a dangling symlink is printed, never followed.
+    find "$dir" -mindepth 1
+    ;;
+  outdated)
+    case " ${FAKE_BREW_OUTDATED:-} " in
+      *" $name "*) exit 1 ;;
+    esac
+    exit 0
+    ;;
+  install | reinstall | upgrade | uninstall)
+    case " ${FAKE_BREW_FAIL:-} " in
+      *" $verb "*) exit 1 ;;
+    esac
+    exit 0
+    ;;
+  *)
+    echo "fake brew: unsupported invocation: $verb $*" >&2
+    exit 2
+    ;;
+esac

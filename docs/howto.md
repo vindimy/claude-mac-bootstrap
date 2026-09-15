@@ -30,6 +30,14 @@ per app (apps with nothing beyond "it installs" are omitted).
 
 - `./run.sh` is idempotent — re-run it any time; already-installed apps are
   skipped, failed or newly selected ones are installed.
+- Deleting a managed app from `/Applications` by hand is picked up on the next
+  run and the app is reinstalled. Homebrew keeps its receipt when you drag an
+  app to the Trash, so `brew list --cask <name>` alone would keep claiming the
+  app is installed; the cask driver instead checks whether the artifact brew
+  staged in the Caskroom still resolves, and repairs the mismatch with
+  `brew reinstall --cask` (plain `brew install` no-ops against the surviving
+  receipt). To *stop* managing an app, deselect it in the checklist rather
+  than deleting it — deleting alone only gets it reinstalled.
 - Per-machine app selection lives in `~/.mac-bootstrap/apps.conf` (outside the
   repo, machine-local by design).
 - `DRY_RUN=1 ./run.sh` prints every mutating command instead of running it.
