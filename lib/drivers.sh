@@ -292,3 +292,154 @@ pref_delete() {
     run_cmd $su defaults $host delete "$1" "$2"
   fi
 }
+
+# ---- Agent config files (TOML / JSON) --------------------------------------
+# For units that pin a setting inside a config file the app itself also
+# writes (Codex's config.toml, Gemini CLI's settings.json). Only the named
+# key is touched; everything else is passed through as written. Line-based
+# on purpose — stock macOS has no TOML library (python3 3.9 lacks tomllib)
+# and the files are simple `[table]` / `key = value` documents.
+
+# toml_get file table key -> prints the value of `key` under `[table]` (or of
+# a top-level dotted `table.key`), trailing comment and whitespace stripped.
+# Prints nothing when unset. Quoted keys, inline tables and arrays of
+# tables are not understood; a key inside `[[table]]` is never matched.
+toml_get() {
+  [ -f "$1" ] || return 1
+  awk -v table="$2" -v key="$3" '
+    BEGIN { top = 1; intable = 0; found = 0 }
+    {
+      s = $0; sub(/#.*/, "", s)
+      if (s ~ /^[ \t]*\[/) {
+        top = 0; intable = 0
+        if (s !~ /^[ \t]*\[\[/) {
+          h = s; sub(/^[ \t]*\[[ \t]*/, "", h); sub(/[ \t]*\][ \t]*$/, "", h)
+          if (h == table) intable = 1
+        }
+        next
+      }
+      if (s !~ /=/) next
+      k = s; sub(/[ \t]*=.*/, "", k); sub(/^[ \t]*/, "", k)
+      v = s; sub(/^[^=]*=[ \t]*/, "", v); sub(/[ \t]*$/, "", v)
+      if ((intable && k == key) || (top && k == table "." key)) { val = v; found = 1 }
+    }
+    END { if (found) print val }
+  ' "$1"
+}
+
+# toml_bool_is file table key true|false -> 0 when set to exactly that.
+toml_bool_is() { [ "$(toml_get "$1" "$2" "$3")" = "$4" ]; }
+
+# toml_set_bool file table key true|false. Replaces the key in place when
+# `[table]` has it, adds it to the table when not, appends the table when
+# the file lacks it, creates the file when missing. A top-level dotted
+# `table.key` line is dropped so the table form is not a duplicate key.
+toml_set_bool() {
+  local file="$1" table="$2" key="$3" value="$4" src tmp
+  if [ "$DRY_RUN" = 1 ]; then
+    log "[dry-run] set $key = $value in [$table] of $file"
+    return 0
+  fi
+  src="$file"
+  [ -f "$src" ] || src=/dev/null
+  tmp="$(mktemp)"
+  if ! awk -v table="$table" -v key="$key" -v value="$value" '
+    function flush() { while (blanks > 0) { print ""; blanks-- } }
+    function put(l) { flush(); print l; printed++ }
+    function emit() { put(key " = " value); done = 1 }
+    BEGIN { top = 1; intable = 0; done = 0; blanks = 0; printed = 0 }
+    {
+      line = $0
+      if (line ~ /^[ \t]*$/) { blanks++; next }
+      s = line; sub(/#.*/, "", s)
+      if (s ~ /^[ \t]*\[/) {
+        if (intable && !done) emit()
+        top = 0; intable = 0
+        if (s !~ /^[ \t]*\[\[/) {
+          h = s; sub(/^[ \t]*\[[ \t]*/, "", h); sub(/[ \t]*\][ \t]*$/, "", h)
+          if (h == table) intable = 1
+        }
+        put(line); next
+      }
+      if (s ~ /=/) {
+        k = s; sub(/[ \t]*=.*/, "", k); sub(/^[ \t]*/, "", k)
+        if (intable && k == key) { if (!done) emit(); next }
+        if (top && k == table "." key) next
+      }
+      put(line)
+    }
+    END {
+      if (intable && !done) emit()
+      if (!done) { if (printed) print ""; print "[" table "]"; print key " = " value }
+    }
+  ' "$src" >"$tmp"; then
+    rm -f "$tmp"
+    err "could not rewrite $file"
+    return 1
+  fi
+  mkdir -p "$(dirname "$file")" || { rm -f "$tmp"; return 1; }
+  # cat, not mv: keeps the file's mode and owner as the app set them.
+  cat "$tmp" >"$file"
+  rm -f "$tmp"
+}
+
+# json_get file dotted.path -> prints the JSON encoding of the value at that
+# path (e.g. `false`, `"x"`). Nothing and rc 1 when the file is missing,
+# unparsable or lacks the path.
+json_get() {
+  [ -f "$1" ] || return 1
+  python3 - "$1" "$2" <<'PY'
+import json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+except Exception:
+    sys.exit(1)
+for p in sys.argv[2].split("."):
+    if not isinstance(d, dict) or p not in d:
+        sys.exit(1)
+    d = d[p]
+print(json.dumps(d))
+PY
+}
+
+# json_bool_is file dotted.path true|false -> 0 when set to exactly that.
+json_bool_is() { [ "$(json_get "$1" "$2" 2>/dev/null)" = "$3" ]; }
+
+# json_set_bool file dotted.path true|false. Creates the file (and missing
+# parent objects) as needed; rewrites with 2-space indent. A file that does
+# not parse is refused with rc 1 rather than overwritten — comments in a
+# JSONC-style settings file count as not parsing.
+json_set_bool() {
+  local file="$1" path="$2" value="$3"
+  if [ "$DRY_RUN" = 1 ]; then
+    log "[dry-run] set $path = $value in $file"
+    return 0
+  fi
+  mkdir -p "$(dirname "$file")" || return 1
+  python3 - "$file" "$path" "$value" <<'PY'
+import json, os, sys
+f, path, value = sys.argv[1:4]
+d = {}
+if os.path.exists(f) and os.path.getsize(f) > 0:
+    try:
+        with open(f) as fh:
+            d = json.load(fh)
+    except Exception:
+        d = None
+    if not isinstance(d, dict):
+        sys.stderr.write("error: %s is not valid JSON — fix or remove it; nothing was changed\n" % f)
+        sys.exit(1)
+node = d
+parts = path.split(".")
+for p in parts[:-1]:
+    if not isinstance(node.get(p), dict):
+        node[p] = {}
+    node = node[p]
+node[parts[-1]] = value == "true"
+tmp = f + ".tmp"
+with open(tmp, "w") as fh:
+    json.dump(d, fh, indent=2)
+    fh.write("\n")
+os.replace(tmp, f)
+PY
+}

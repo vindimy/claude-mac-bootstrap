@@ -90,6 +90,7 @@
   "disableRemoteControl": true,
   "disableClaudeAiConnectors": true,
   "enableArtifact": false,
+  "autoMemoryEnabled": false,
   "permissions": {
     "deny": [
       "DesignSync",

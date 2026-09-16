@@ -14,6 +14,8 @@ per app (apps with nothing beyond "it installs" are omitted).
 - [agent-skills / agent-skill-suites](#agent-skills--agent-skill-suites)
 - [gsd](#gsd)
 - [mcp-servers](#mcp-servers)
+- [codex](#codex)
+- [gemini-cli](#gemini-cli)
 - [dropbox](#dropbox)
 - [controld](#controld)
 - [little-snitch](#little-snitch)
@@ -143,6 +145,14 @@ docker context, so existing projects work unchanged:
   `dotfiles/.claude/statusline-command.sh` whenever it differs). It is what
   `statusLine.command` in settings.json runs; edit the repo copy to change
   the status line's fields or colors. It needs `jq`, which macOS ships.
+- **Auto memory is off.** `autoMemoryEnabled: false` in the managed
+  settings.json turns off Claude Code's per-project auto memory
+  (`~/.claude/projects/<project>/memory/`), in the terminal and in the VS
+  Code extension alike (same CLI, same file). Memory files written before the
+  change stay on disk; delete them by hand if unwanted. To allow it for one
+  project, set `autoMemoryEnabled: true` in that project's
+  `.claude/settings.local.json` — project and local settings override the
+  user file.
 - The `claude-plugins` unit re-applies the settings after installing
   plugins, because `claude plugin install` marks each plugin enabled and the
   managed profile keeps part of the roster installed-but-disabled.
@@ -249,6 +259,33 @@ docker context, so existing projects work unchanged:
   a clash; remove it or rename it to let the unit manage the user-scope
   copy.
 
+## codex
+
+- **Memories are pinned off.** On every install and `./update.sh` the unit
+  sets `[features] memories = false`, `[memories] generate_memories = false`
+  and `use_memories = false` in `~/.codex/config.toml`, editing only those
+  keys — MCP servers, plugins and the ChatGPT desktop app's own sections are
+  left as written. The Codex VS Code extension and the ChatGPT app read the
+  same file, so the setting holds there too; the app's Settings >
+  Personalization > Enable memories toggle is undone on the next run.
+  Existing files under `~/.codex/memories/` are not deleted.
+- **Turning them back on** means dropping the three keys from
+  `codex_settings_apply` in `apps/codex.sh`; a hand edit is reverted next run.
+- **`--dry-run`** prints each key it would set without writing.
+
+## gemini-cli
+
+- **Auto Memory is pinned off.** `experimental.autoMemory` is set to `false`
+  in `~/.gemini/settings.json` on every install and `./update.sh`. Upstream
+  defaults it to off today; the pin guards against a default flip. Only that
+  key is written — the `mcp-servers` entries and anything else stay. The
+  Gemini CLI Companion extension runs this same CLI, so VS Code follows.
+  Manual memory (the agent editing `GEMINI.md`) has no switch and is not
+  affected.
+- **settings.json must be plain JSON.** The unit refuses to touch a file it
+  cannot parse (for example one with `//` comments) and fails the unit
+  instead of overwriting it; fix the file and rerun.
+
 ## dropbox
 
 - If install fails, enable the extension in System Settings → Privacy &
@@ -297,6 +334,10 @@ docker context, so existing projects work unchanged:
   signs in on first use (Anthropic, ChatGPT and Google accounts
   respectively). Skills and MCP servers need nothing extra — the extensions
   run the same CLIs against the same home directories.
+- **Memory settings carry over.** Auto memory is turned off for Claude Code,
+  Codex and Gemini CLI by their units (see those sections). Because the
+  extensions run the same CLIs against the same home directories, the
+  setting holds inside VS Code with nothing extra to configure.
 - **Where they appear.** Claude Code and Codex register a view in the
   secondary (right) side bar, so they show as tabs there. Gemini CLI
   Companion contributes no panel at all, only commands such as `Gemini CLI:
