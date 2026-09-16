@@ -79,6 +79,8 @@ see [docs/windows-vscode-claude-codex.md](docs/windows-vscode-claude-codex.md).
 | `gemini` | Google Gemini Desktop | brew cask `google-gemini` (self-updates) |
 | `gemini-cli` | Gemini CLI | brew formula `gemini-cli`; pins Auto Memory off (`experimental.autoMemory: false` in `~/.gemini/settings.json`, only that key written, re-applied on every update) |
 | `gh` | GitHub CLI | brew formula `gh`; run `gh auth login` once — the issue tracker convention in `docs/agents/issue-tracker.md` depends on it |
+| `glab` | GitLab CLI | brew formula `glab`; run `glab auth login` once (`--hostname` for self-hosted) |
+| `cloud-clis` | Cloud CLIs (az, aws, gcloud) | brew formulas `azure-cli` + `awscli`, brew cask `gcloud-cli` (self-updates via `gcloud components update`); one checklist entry, installed only when all three are present, a hand-deleted one comes back on the next run; sign in once each with `az login`, `aws configure`, `gcloud init` — see [docs/howto.md](docs/howto.md#cloud-clis) |
 | `chatgpt` | ChatGPT | brew cask `chatgpt` (self-updates) |
 | `maccy` | Maccy | brew cask `maccy` |
 | `iterm` | iTerm2 | brew cask `iterm2` (self-updates) |

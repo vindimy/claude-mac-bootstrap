@@ -16,6 +16,7 @@ per app (apps with nothing beyond "it installs" are omitted).
 - [mcp-servers](#mcp-servers)
 - [codex](#codex)
 - [gemini-cli](#gemini-cli)
+- [cloud-clis](#cloud-clis)
 - [dropbox](#dropbox)
 - [controld](#controld)
 - [little-snitch](#little-snitch)
@@ -285,6 +286,24 @@ docker context, so existing projects work unchanged:
 - **settings.json must be plain JSON.** The unit refuses to touch a file it
   cannot parse (for example one with `//` comments) and fails the unit
   instead of overwriting it; fix the file and rerun.
+
+## cloud-clis
+
+- **Three tools, one checklist entry.** `az` and `aws` come from the
+  `azure-cli` and `awscli` formulas; `gcloud` (plus `gsutil` and `bq`) from
+  the `gcloud-cli` cask, the only Homebrew packaging Google offers. Each is
+  installed or repaired on its own, so deleting one by hand gets just that
+  one reinstalled on the next run; deselecting the unit removes all three.
+- **Sign in once per cloud.** `az login`, `aws configure` (or
+  `aws configure sso` for IAM Identity Center) and `gcloud init`. Credentials
+  live in `~/.azure`, `~/.aws` and `~/.config/gcloud`; `zap` on deselect
+  clears only what the `gcloud-cli` cask declares, the formulas have no zap,
+  so remove the other two directories by hand if you want a clean slate.
+- **gcloud updates itself.** The cask is marked `auto_updates`, so
+  `./update.sh` upgrades `az` and `aws` through brew but leaves `gcloud` to
+  `gcloud components update`. Extra components (`kubectl`, emulators) install
+  under `$(brew --prefix)/share/google-cloud-sdk/bin`, which is not on PATH
+  by default — export it in your shell profile if you add any.
 
 ## dropbox
 
