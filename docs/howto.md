@@ -23,6 +23,7 @@ per app (apps with nothing beyond "it installs" are omitted).
 - [xcode](#xcode)
 - [android-studio](#android-studio)
 - [vscode](#vscode)
+- [socks-proxy (VS Code agents over an SSH tunnel)](#socks-proxy-vs-code-agents-over-an-ssh-tunnel)
 - [adobe-cc](#adobe-cc)
 - [hardening](#hardening)
 - [performance](#performance)
@@ -376,6 +377,42 @@ docker context, so existing projects work unchanged:
 - **Removal.** Deselecting an agent CLI leaves its extension in VS Code
   (uninstall it from the Extensions view). Deselecting `vscode` with zap
   removes `~/.vscode` and the app's user settings along with the app.
+
+## socks-proxy (VS Code agents over an SSH tunnel)
+
+Not a unit — `bin/socks-proxy.sh` is run by hand, from the checkout, when you
+want the VS Code agent extensions to reach the internet through an SSH SOCKS5
+tunnel instead of directly. Full write-up, including the manual equivalent of
+every step and the evidence behind it:
+[VS Code agents over an SSH SOCKS tunnel](macos-vscode-socks-proxy.md).
+
+- **Start the tunnel first.** `ssh -D 1080 -N -f user@remote_server_ip`. The
+  script manages nothing about the tunnel and refuses to configure anything
+  while port 1080 is dead, so a half-configured machine is not a state you can
+  reach.
+- **Why a bridge.** None of the three extensions can use a SOCKS proxy:
+  Anthropic documents that Claude Code does not support one, Copilot ships its
+  own HTTP-only proxy client, and Codex's `reqwest` build has no `socks`
+  feature — and reqwest *silently drops* a proxy URL it cannot parse, so a
+  SOCKS URL there means an unencrypted direct connection that looks configured.
+  The script therefore runs privoxy as an HTTP-to-SOCKS5 bridge on
+  `127.0.0.1:8118` and points every tool at that.
+- **DNS.** privoxy's `forward-socks5` hands the hostname to the SSH server,
+  which resolves it there, so no lookup leaves the Mac. `forward-socks4` in the
+  same slot would encrypt the traffic and leak every hostname.
+- **Usage.** `up` (add `--gui` if you launch VS Code from the Dock rather than
+  a terminal), `status`, `verify`, `down`; `env` and `config` print what it
+  would set. Restart VS Code after `up` and after `down` — the extension host
+  reads the proxy at startup, and the CLIs inherit it from VS Code.
+- **What it touches.** Four `http.*` keys in VS Code's user settings (backed up
+  once to `~/.mac-bootstrap/socks-proxy/` before the first edit, and deleted
+  again by `down`), the proxy environment file in the same directory, and with
+  `--gui` the `launchctl` user environment. It installs privoxy via Homebrew if
+  it is missing.
+- **Not covered.** VS Code's own Chromium traffic (Marketplace, updates) still
+  goes direct; it takes SOCKS5 natively if you want it, see the document.
+  Terminal commands are unaffected unless you source
+  `~/.mac-bootstrap/socks-proxy/proxy.env` yourself.
 
 ## adobe-cc
 
